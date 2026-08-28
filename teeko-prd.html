@@ -1,0 +1,4085 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Teeko 产品需求文档，涵盖备课、互动课堂、课堂报告与继续备课的完整业务闭环。">
+  <title>Teeko 产品需求文档</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f3f5f4;
+      --surface: #fbfcfb;
+      --surface-2: #eef2f0;
+      --text: #18211e;
+      --muted: #5b6863;
+      --line: #d5ddd9;
+      --accent: #087f67;
+      --accent-strong: #066653;
+      --accent-soft: #dff3ed;
+      --warn: #9a5b08;
+      --warn-soft: #fff0cd;
+      --code: #17201d;
+      --code-text: #dce7e2;
+      --radius: 14px;
+      --shadow: 0 18px 50px rgb(23 50 41 / 8%);
+      font-family: "SF Pro Text", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      font-synthesis: none;
+    }
+    :root[data-theme="dark"] {
+      --bg: #111614;
+      --surface: #171d1a;
+      --surface-2: #202824;
+      --text: #e7efeb;
+      --muted: #a0ada7;
+      --line: #34413b;
+      --accent: #55c9ad;
+      --accent-strong: #83ddc7;
+      --accent-soft: #143c32;
+      --warn: #f1bd68;
+      --warn-soft: #3b2d14;
+      --code: #0c110f;
+      --code-text: #dce7e2;
+      --shadow: 0 18px 50px rgb(0 0 0 / 24%);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 92px; }
+    body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.72; }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    a { color: var(--accent-strong); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    a:hover { text-decoration-thickness: 2px; }
+    :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+    .progress { position: fixed; inset: 0 0 auto 0; z-index: 30; height: 3px; background: var(--accent); transform: scaleX(0); transform-origin: left; animation: reading-progress linear both; animation-timeline: scroll(root); }
+    @keyframes reading-progress { to { transform: scaleX(1); } }
+    .topbar { position: sticky; top: 0; z-index: 20; height: 68px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(16px); }
+    .topbar-inner { max-width: 1460px; height: 100%; margin: auto; padding: 0 24px; display: flex; align-items: center; gap: 14px; }
+    .brand { display: flex; align-items: baseline; gap: 10px; min-width: 218px; font-weight: 760; letter-spacing: -.02em; }
+    .brand small { color: var(--muted); font-size: 12px; font-weight: 620; letter-spacing: .02em; }
+    .search { position: relative; flex: 1; max-width: 620px; }
+    .search input { width: 100%; height: 40px; padding: 0 92px 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); }
+    .search input::placeholder { color: var(--muted); opacity: 1; }
+    .search-status { position: absolute; right: 12px; top: 9px; color: var(--muted); font-size: 12px; }
+    .actions { margin-left: auto; display: flex; gap: 8px; }
+    .icon-button { min-width: 62px; height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; }
+    .icon-button:hover { border-color: var(--accent); color: var(--accent-strong); }
+    .icon-button:active { transform: translateY(1px); }
+    .menu-button { display: none; }
+    .layout { max-width: 1460px; margin: 0 auto; padding: 38px 24px 90px; display: grid; grid-template-columns: 270px minmax(0, 850px) 190px; gap: 42px; align-items: start; }
+    .sidebar { position: sticky; top: 96px; max-height: calc(100dvh - 120px); overflow: auto; scrollbar-width: thin; }
+    .sidebar-title { margin: 0 0 10px; color: var(--muted); font-size: 12px; font-weight: 760; letter-spacing: .08em; text-transform: uppercase; }
+    .toc { display: grid; gap: 2px; }
+    .toc-link { display: block; padding: 7px 10px; border-left: 2px solid transparent; border-radius: 0 8px 8px 0; color: var(--muted); font-size: 13px; line-height: 1.35; text-decoration: none; }
+    .toc-link.level-3 { padding-left: 22px; font-size: 12px; }
+    .toc-link:hover { background: var(--surface-2); color: var(--text); }
+    .toc-link.active { border-left-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong); font-weight: 700; }
+    .document { min-width: 0; padding: 0 54px 64px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); }
+    .document-hero { margin: 0 -54px 54px; padding: 62px 54px 52px; border-bottom: 1px solid var(--line); background: linear-gradient(135deg, var(--accent-soft), transparent 72%); border-radius: var(--radius) var(--radius) 0 0; }
+    .eyebrow { margin: 0 0 16px !important; color: var(--accent-strong) !important; font-size: 12px !important; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { max-width: 15ch; margin: 0; font-size: clamp(38px, 5vw, 62px); line-height: 1.04; letter-spacing: -.055em; }
+    .lede { max-width: 600px; margin: 22px 0 0 !important; color: var(--muted); font-size: 18px !important; }
+    h2, h3, h4 { position: relative; color: var(--text); text-wrap: balance; }
+    h2 { margin: 76px 0 24px; padding-top: 6px; font-size: 30px; line-height: 1.25; letter-spacing: -.035em; }
+    h2::before { content: ""; display: block; width: 44px; height: 4px; margin-bottom: 16px; border-radius: 4px; background: var(--accent); }
+    h3 { margin: 46px 0 16px; font-size: 21px; line-height: 1.35; letter-spacing: -.018em; }
+    h4 { margin: 30px 0 10px; font-size: 16px; line-height: 1.4; }
+    .heading-anchor { margin-left: 8px; color: var(--muted); opacity: 0; font-size: .7em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor, h4:hover .heading-anchor, .heading-anchor:focus-visible { opacity: 1; }
+    p { margin: 12px 0; font-size: 15px; }
+    strong { font-weight: 760; }
+    ul, ol { margin: 14px 0 20px; padding-left: 1.4em; }
+    li { margin: 7px 0; padding-left: .25em; }
+    li::marker { color: var(--accent); font-weight: 700; }
+    hr { margin: 64px 0; border: 0; border-top: 1px solid var(--line); }
+    blockquote { margin: 24px 0; padding: 16px 18px; border-left: 4px solid var(--accent); border-radius: 0 var(--radius) var(--radius) 0; background: var(--accent-soft); }
+    code { padding: .12em .38em; border-radius: 5px; background: var(--surface-2); font-family: "SFMono-Regular", Consolas, monospace; font-size: .88em; }
+    .decision { padding: .08em .36em; border-radius: 5px; background: var(--warn-soft); color: var(--warn); font-weight: 760; }
+    .decision.technical { outline: 1px solid color-mix(in srgb, var(--warn) 35%, transparent); }
+    .table-wrap { margin: 22px 0 30px; overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); scrollbar-width: thin; }
+    table { width: 100%; min-width: 660px; border-collapse: collapse; font-size: 13px; line-height: 1.55; }
+    th, td { padding: 12px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+    th { position: sticky; top: 0; background: var(--surface-2); color: var(--text); font-weight: 760; }
+    td:first-child, th:first-child { min-width: 118px; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: color-mix(in srgb, var(--accent-soft) 42%, transparent); }
+    .code-block { margin: 24px 0 34px; overflow: hidden; border: 1px solid #34413b; border-radius: var(--radius); background: var(--code); }
+    .code-block figcaption { padding: 11px 15px; border-bottom: 1px solid #34413b; color: #9fb0a8; font-size: 12px; font-weight: 700; }
+    .code-block pre { margin: 0; padding: 20px; overflow: auto; color: var(--code-text); line-height: 1.65; }
+    .code-block pre code { padding: 0; background: transparent; color: inherit; font-size: 12px; }
+    .mermaid-block { margin: 24px 0 36px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+    .mermaid-block figcaption { padding: 12px 15px; border-bottom: 1px solid var(--line); background: var(--surface-2); color: var(--muted); font-size: 12px; font-weight: 760; }
+    .mermaid { min-height: 180px; padding: 24px; overflow: auto; color: var(--muted); white-space: pre; font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; line-height: 1.65; }
+    .mermaid[data-processed="true"] { display: flex; justify-content: center; min-width: 0; color: inherit; white-space: normal; font-family: inherit; }
+    .mermaid svg { display: block; width: auto; max-width: 100%; height: auto; }
+    .diagram-failed figcaption::after { content: "  图表未加载，显示 Mermaid 源码"; color: var(--warn); font-weight: 650; }
+    .rail { position: sticky; top: 96px; display: grid; gap: 14px; }
+    .rail-card { padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+    .rail-card h2 { margin: 0 0 12px; padding: 0; font-size: 13px; letter-spacing: 0; }
+    .rail-card h2::before { display: none; }
+    .stat { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .stat:last-child { border-bottom: 0; }
+    .stat strong { color: var(--text); font-variant-numeric: tabular-nums; }
+    .legend { display: flex; gap: 7px; align-items: flex-start; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .legend .decision { flex: 0 0 auto; }
+    mark.search-hit { padding: 0; background: #ffe16b; color: #342900; border-radius: 2px; }
+    mark.search-hit.current { outline: 3px solid var(--accent); }
+    .backdrop { display: none; }
+    .skip-link { position: fixed; z-index: 100; left: 16px; top: -80px; padding: 10px 14px; border-radius: 8px; background: var(--accent); color: #071c16; font-weight: 800; }
+    .skip-link:focus { top: 12px; }
+    @media (max-width: 1180px) {
+      .layout { grid-template-columns: 250px minmax(0, 1fr); gap: 28px; }
+      .rail { display: none; }
+    }
+    @media (max-width: 820px) {
+      .topbar { height: 62px; }
+      .topbar-inner { padding: 0 14px; }
+      .brand { min-width: auto; }
+      .brand small, .actions .print-button { display: none; }
+      .menu-button { display: inline-block; }
+      .search input { height: 38px; padding-right: 14px; }
+      .search-status { display: none; }
+      .layout { display: block; padding: 18px 12px 64px; }
+      .sidebar { position: fixed; z-index: 50; inset: 0 auto 0 0; width: min(86vw, 320px); max-height: none; padding: 26px 20px; background: var(--surface); transform: translateX(-105%); transition: transform .2s ease; box-shadow: var(--shadow); }
+      body.menu-open .sidebar { transform: translateX(0); }
+      .backdrop { position: fixed; z-index: 40; inset: 0; background: rgb(8 16 13 / 48%); }
+      body.menu-open .backdrop { display: block; }
+      .document { padding: 0 20px 44px; }
+      .document-hero { margin: 0 -20px 42px; padding: 44px 20px 38px; }
+      h1 { font-size: 40px; }
+      .lede { font-size: 16px !important; }
+      h2 { margin-top: 58px; font-size: 26px; }
+      h3 { margin-top: 38px; }
+      .heading-anchor { opacity: .55; }
+    }
+    @media (max-width: 520px) {
+      .brand { font-size: 14px; }
+      .actions { gap: 5px; }
+      .icon-button { min-width: 50px; padding: 0 8px; font-size: 12px; }
+      .search { min-width: 0; }
+      h1 { font-size: 34px; }
+      .document { border-radius: 10px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; }
+    }
+    @media print {
+      :root { color-scheme: light; --bg: #fff; --surface: #fff; --surface-2: #f2f4f3; --text: #111; --muted: #444; --line: #ccc; --accent: #087f67; --accent-strong: #066653; --accent-soft: #e9f5f1; --warn: #774500; --warn-soft: #fff0cd; }
+      .topbar, .sidebar, .rail, .progress, .backdrop, .heading-anchor { display: none !important; }
+      body { background: #fff; font-size: 10pt; }
+      .layout { display: block; max-width: none; padding: 0; }
+      .document { padding: 0; border: 0; box-shadow: none; }
+      .document-hero { margin: 0 0 38px; padding: 36px 0; border-radius: 0; }
+      h1 { font-size: 34pt; }
+      h2 { break-before: page; margin-top: 0; padding-top: 24px; }
+      h2:first-of-type { break-before: auto; }
+      h3, h4 { break-after: avoid; }
+      p, li, tr, blockquote, figure { break-inside: avoid; }
+      .table-wrap { overflow: visible; }
+      table { min-width: 0; font-size: 8pt; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#document">跳到正文</a>
+  <div class="progress" aria-hidden="true"></div>
+  <header class="topbar"><div class="topbar-inner">
+    <button class="icon-button menu-button" type="button" aria-expanded="false" aria-controls="sidebar">目录</button>
+    <div class="brand">Teeko <small>产品需求文档</small></div>
+    <label class="search">
+      <span hidden>搜索文档</span>
+      <input class="search-input" type="search" placeholder="搜索需求、页面或状态" aria-label="搜索文档" autocomplete="off">
+      <span class="search-status" aria-live="polite"></span>
+    </label>
+    <div class="actions"><button class="icon-button theme-button" type="button">深色</button><button class="icon-button print-button" type="button">打印</button></div>
+  </div></header>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" aria-label="文档目录"><p class="sidebar-title">目录</p><nav class="toc"><a class="toc-link level-2" href="#0-阅读说明" data-target="0-阅读说明">0. 阅读说明</a>
+<a class="toc-link level-2" href="#1-需求背景" data-target="1-需求背景">1. 需求背景</a>
+<a class="toc-link level-3" href="#11-项目背景" data-target="11-项目背景">1.1 项目背景</a>
+<a class="toc-link level-3" href="#12-主要解决的问题" data-target="12-主要解决的问题">1.2 主要解决的问题</a>
+<a class="toc-link level-3" href="#13-核心业务闭环要求" data-target="13-核心业务闭环要求">1.3 核心业务闭环要求</a>
+<a class="toc-link level-2" href="#2-产品定位目标与非目标" data-target="2-产品定位目标与非目标">2. 产品定位、目标与非目标</a>
+<a class="toc-link level-3" href="#21-一句话定位" data-target="21-一句话定位">2.1 一句话定位</a>
+<a class="toc-link level-3" href="#22-本次目标" data-target="22-本次目标">2.2 本次目标</a>
+<a class="toc-link level-3" href="#23-产品价值优先级" data-target="23-产品价值优先级">2.3 产品价值优先级</a>
+<a class="toc-link level-3" href="#24-本期范围边界" data-target="24-本期范围边界">2.4 本期范围边界</a>
+<a class="toc-link level-3" href="#25-成功衡量" data-target="25-成功衡量">2.5 成功衡量</a>
+<a class="toc-link level-2" href="#3-用户场景与权限边界" data-target="3-用户场景与权限边界">3. 用户、场景与权限边界</a>
+<a class="toc-link level-3" href="#31-用户角色" data-target="31-用户角色">3.1 用户角色</a>
+<a class="toc-link level-3" href="#32-权限原则" data-target="32-权限原则">3.2 权限原则</a>
+<a class="toc-link level-3" href="#33-核心使用场景" data-target="33-核心使用场景">3.3 核心使用场景</a>
+<a class="toc-link level-2" href="#4-产品范围与信息架构" data-target="4-产品范围与信息架构">4. 产品范围与信息架构</a>
+<a class="toc-link level-3" href="#41-教师端一级入口" data-target="41-教师端一级入口">4.1 教师端一级入口</a>
+<a class="toc-link level-3" href="#42-学生端页面" data-target="42-学生端页面">4.2 学生端页面</a>
+<a class="toc-link level-3" href="#43-核心能力范围" data-target="43-核心能力范围">4.3 核心能力范围</a>
+<a class="toc-link level-2" href="#5-核心业务对象与数据关系" data-target="5-核心业务对象与数据关系">5. 核心业务对象与数据关系</a>
+<a class="toc-link level-3" href="#51-业务对象" data-target="51-业务对象">5.1 业务对象</a>
+<a class="toc-link level-3" href="#52-数据关系" data-target="52-数据关系">5.2 数据关系</a>
+<a class="toc-link level-3" href="#53-快照原则" data-target="53-快照原则">5.3 快照原则</a>
+<a class="toc-link level-2" href="#6-端到端业务闭环" data-target="6-端到端业务闭环">6. 端到端业务闭环</a>
+<a class="toc-link level-3" href="#61-三条备课入口的汇合点" data-target="61-三条备课入口的汇合点">6.1 三条备课入口的汇合点</a>
+<a class="toc-link level-2" href="#7-页面清单与导航关系" data-target="7-页面清单与导航关系">7. 页面清单与导航关系</a>
+<a class="toc-link level-2" href="#8-详细用户流程" data-target="8-详细用户流程">8. 详细用户流程</a>
+<a class="toc-link level-3" href="#81-登录与激活" data-target="81-登录与激活">8.1 登录与激活</a>
+<a class="toc-link level-3" href="#82-首页对话式备课与独立备课" data-target="82-首页对话式备课与独立备课">8.2 首页对话式备课与独立备课</a>
+<a class="toc-link level-3" href="#83-从资源广场备课" data-target="83-从资源广场备课">8.3 从资源广场备课</a>
+<a class="toc-link level-3" href="#84-教学作品与配套题" data-target="84-教学作品与配套题">8.4 教学作品与配套题</a>
+<a class="toc-link level-3" href="#85-个人作品保存与复用" data-target="85-个人作品保存与复用">8.5 个人作品保存与复用</a>
+<a class="toc-link level-3" href="#86-创建课堂与候课" data-target="86-创建课堂与候课">8.6 创建课堂与候课</a>
+<a class="toc-link level-3" href="#87-学生匿名加入" data-target="87-学生匿名加入">8.7 学生匿名加入</a>
+<a class="toc-link level-3" href="#88-教学内容只读同步" data-target="88-教学内容只读同步">8.8 教学内容只读同步</a>
+<a class="toc-link level-3" href="#89-发布正式题" data-target="89-发布正式题">8.9 发布正式题</a>
+<a class="toc-link level-3" href="#810-发起投票" data-target="810-发起投票">8.10 发起投票</a>
+<a class="toc-link level-3" href="#811-发起信号灯" data-target="811-发起信号灯">8.11 发起信号灯</a>
+<a class="toc-link level-3" href="#812-结束课堂" data-target="812-结束课堂">8.12 结束课堂</a>
+<a class="toc-link level-3" href="#813-查看课堂报告" data-target="813-查看课堂报告">8.13 查看课堂报告</a>
+<a class="toc-link level-3" href="#814-报告进入下一次备课" data-target="814-报告进入下一次备课">8.14 报告进入下一次备课</a>
+<a class="toc-link level-2" href="#9-功能需求明细" data-target="9-功能需求明细">9. 功能需求明细</a>
+<a class="toc-link level-3" href="#91-账号与权益" data-target="91-账号与权益">9.1 账号与权益</a>
+<a class="toc-link level-3" href="#92-备课与生成" data-target="92-备课与生成">9.2 备课与生成</a>
+<a class="toc-link level-3" href="#93-资源广场与个人资产" data-target="93-资源广场与个人资产">9.3 资源广场与个人资产</a>
+<a class="toc-link level-3" href="#94-配套题" data-target="94-配套题">9.4 配套题</a>
+<a class="toc-link level-3" href="#95-课堂与学生" data-target="95-课堂与学生">9.5 课堂与学生</a>
+<a class="toc-link level-3" href="#96-课堂互动" data-target="96-课堂互动">9.6 课堂互动</a>
+<a class="toc-link level-3" href="#97-报告与继续备课" data-target="97-报告与继续备课">9.7 报告与继续备课</a>
+<a class="toc-link level-2" href="#10-页面状态设计" data-target="10-页面状态设计">10. 页面状态设计</a>
+<a class="toc-link level-3" href="#101-通用状态原则" data-target="101-通用状态原则">10.1 通用状态原则</a>
+<a class="toc-link level-3" href="#102-教师端页面状态矩阵" data-target="102-教师端页面状态矩阵">10.2 教师端页面状态矩阵</a>
+<a class="toc-link level-3" href="#103-学生端页面状态矩阵" data-target="103-学生端页面状态矩阵">10.3 学生端页面状态矩阵</a>
+<a class="toc-link level-3" href="#104-学生端显示优先级" data-target="104-学生端显示优先级">10.4 学生端显示优先级</a>
+<a class="toc-link level-2" href="#11-状态机与冲突规则" data-target="11-状态机与冲突规则">11. 状态机与冲突规则</a>
+<a class="toc-link level-3" href="#111-教学作品状态" data-target="111-教学作品状态">11.1 教学作品状态</a>
+<a class="toc-link level-3" href="#112-课堂状态" data-target="112-课堂状态">11.2 课堂状态</a>
+<a class="toc-link level-3" href="#113-互动轮次状态" data-target="113-互动轮次状态">11.3 互动轮次状态</a>
+<a class="toc-link level-3" href="#114-报告状态" data-target="114-报告状态">11.4 报告状态</a>
+<a class="toc-link level-3" href="#115-跨页面冲突" data-target="115-跨页面冲突">11.5 跨页面冲突</a>
+<a class="toc-link level-2" href="#12-异常情况与边界处理" data-target="12-异常情况与边界处理">12. 异常情况与边界处理</a>
+<a class="toc-link level-3" href="#121-登录激活与权益" data-target="121-登录激活与权益">12.1 登录、激活与权益</a>
+<a class="toc-link level-3" href="#122-教案上传与生成" data-target="122-教案上传与生成">12.2 教案上传与生成</a>
+<a class="toc-link level-3" href="#123-资源与个人作品" data-target="123-资源与个人作品">12.3 资源与个人作品</a>
+<a class="toc-link level-3" href="#124-创建加入与同步课堂" data-target="124-创建加入与同步课堂">12.4 创建、加入与同步课堂</a>
+<a class="toc-link level-3" href="#125-正式题与课堂工具" data-target="125-正式题与课堂工具">12.5 正式题与课堂工具</a>
+<a class="toc-link level-3" href="#126-结束课堂与报告" data-target="126-结束课堂与报告">12.6 结束课堂与报告</a>
+<a class="toc-link level-2" href="#13-费用激活与权限规则" data-target="13-费用激活与权限规则">13. 费用、激活与权限规则</a>
+<a class="toc-link level-3" href="#131-已确认规则" data-target="131-已确认规则">13.1 已确认规则</a>
+<a class="toc-link level-3" href="#132-权限矩阵" data-target="132-权限矩阵">13.2 权限矩阵</a>
+<a class="toc-link level-3" href="#133-激活码待确认规则" data-target="133-激活码待确认规则">13.3 激活码待确认规则</a>
+<a class="toc-link level-3" href="#134-费用待确认规则" data-target="134-费用待确认规则">13.4 费用待确认规则</a>
+<a class="toc-link level-3" href="#135-资产归属待确认规则" data-target="135-资产归属待确认规则">13.5 资产归属待确认规则</a>
+<a class="toc-link level-2" href="#14-数据隐私与安全规则" data-target="14-数据隐私与安全规则">14. 数据、隐私与安全规则</a>
+<a class="toc-link level-3" href="#141-已确认的匿名原则" data-target="141-已确认的匿名原则">14.1 已确认的匿名原则</a>
+<a class="toc-link level-3" href="#142-建议的数据分层" data-target="142-建议的数据分层">14.2 建议的数据分层</a>
+<a class="toc-link level-3" href="#143-待确认的隐私与安全事项" data-target="143-待确认的隐私与安全事项">14.3 待确认的隐私与安全事项</a>
+<a class="toc-link level-2" href="#15-非功能要求与研发核验" data-target="15-非功能要求与研发核验">15. 非功能要求与研发核验</a>
+<a class="toc-link level-3" href="#151-现有能力复用边界" data-target="151-现有能力复用边界">15.1 现有能力复用边界</a>
+<a class="toc-link level-3" href="#152-p0-技术核验清单" data-target="152-p0-技术核验清单">15.2 P0 技术核验清单</a>
+<a class="toc-link level-3" href="#153-性能与稳定性待确认" data-target="153-性能与稳定性待确认">15.3 性能与稳定性待确认</a>
+<a class="toc-link level-3" href="#154-兼容性与体验待确认" data-target="154-兼容性与体验待确认">15.4 兼容性与体验待确认</a>
+<a class="toc-link level-3" href="#155-可观测性与运营待确认" data-target="155-可观测性与运营待确认">15.5 可观测性与运营待确认</a>
+<a class="toc-link level-2" href="#16-验收标准" data-target="16-验收标准">16. 验收标准</a>
+<a class="toc-link level-3" href="#161-验收说明" data-target="161-验收说明">16.1 验收说明</a>
+<a class="toc-link level-3" href="#162-账号范围与资产" data-target="162-账号范围与资产">16.2 账号、范围与资产</a>
+<a class="toc-link level-3" href="#163-独立备课与生成" data-target="163-独立备课与生成">16.3 独立备课与生成</a>
+<a class="toc-link level-3" href="#164-配套题" data-target="164-配套题">16.4 配套题</a>
+<a class="toc-link level-3" href="#165-资源广场与个人版本" data-target="165-资源广场与个人版本">16.5 资源广场与个人版本</a>
+<a class="toc-link level-3" href="#166-创建课堂与匿名加入" data-target="166-创建课堂与匿名加入">16.6 创建课堂与匿名加入</a>
+<a class="toc-link level-3" href="#167-教学内容只读同步" data-target="167-教学内容只读同步">16.7 教学内容只读同步</a>
+<a class="toc-link level-3" href="#168-正式题" data-target="168-正式题">16.8 正式题</a>
+<a class="toc-link level-3" href="#169-投票与信号灯" data-target="169-投票与信号灯">16.9 投票与信号灯</a>
+<a class="toc-link level-3" href="#1610-报告历史与继续备课" data-target="1610-报告历史与继续备课">16.10 报告、历史与继续备课</a>
+<a class="toc-link level-3" href="#1611-范围验收" data-target="1611-范围验收">16.11 范围验收</a>
+<a class="toc-link level-2" href="#17-原型交付要求" data-target="17-原型交付要求">17. 原型交付要求</a>
+<a class="toc-link level-2" href="#18-待确认事项总表" data-target="18-待确认事项总表">18. 待确认事项总表</a>
+<a class="toc-link level-3" href="#181-p0不确认会阻塞范围或核心链路" data-target="181-p0不确认会阻塞范围或核心链路">18.1 P0：不确认会阻塞范围或核心链路</a>
+<a class="toc-link level-3" href="#182-p1影响主要页面与体验" data-target="182-p1影响主要页面与体验">18.2 P1：影响主要页面与体验</a>
+<a class="toc-link level-3" href="#183-p2商业运营与扩展" data-target="183-p2商业运营与扩展">18.3 P2：商业、运营与扩展</a>
+<a class="toc-link level-2" href="#19-建议评审顺序" data-target="19-建议评审顺序">19. 建议评审顺序</a>
+<a class="toc-link level-2" href="#20-结论" data-target="20-结论">20. 结论</a>
+<a class="toc-link level-2" href="#附录-a已知能力与样例参考" data-target="附录-a已知能力与样例参考">附录 A：已知能力与样例参考</a></nav></aside>
+    <main class="document" id="document">
+      <header class="document-hero"><p class="eyebrow">产品需求文档</p><h1>Teeko 产品需求文档</h1><p class="lede">从教师备课到课堂互动，再回到下一次备课的完整产品定义。</p></header>
+      <div class="table-wrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>产品名称</td>
+<td>Teeko</td>
+</tr>
+<tr>
+<td>产品版本</td>
+<td>V2.0</td>
+</tr>
+<tr>
+<td>文档版本</td>
+<td>V0.11（评审稿）</td>
+</tr>
+<tr>
+<td>文档日期</td>
+<td>2026-08-28</td>
+</tr>
+<tr>
+<td>产品形态</td>
+<td>面向教师个人使用的 C 端产品；由学校采购并发放激活码</td>
+</tr>
+<tr>
+<td>核心闭环</td>
+<td>备课 → 互动课堂 → 课堂报告 → 下一次备课</td>
+</tr>
+<tr>
+<td>优先级</td>
+<td>备课 ＞ 课堂互动 ＞ 课堂报告</td>
+</tr>
+<tr>
+<td>文档用途</td>
+<td>市场验证、产品原型设计与研发可行性评审</td>
+</tr>
+</tbody></table></div>
+<h2 id="0-阅读说明">0. 阅读说明<a class="heading-anchor" href="#0-阅读说明" aria-label="链接到本节">#</a></h2><ul>
+<li>本文未特别标注的产品原则，均来自前期已经确认的结论。</li>
+<li><strong>待确认</strong>：此前没有形成明确决定，不应被研发或设计视为已锁定需求。</li>
+<li><strong>待确认（技术核验）</strong>：产品目标已经明确，但依赖现有教学作品生成服务、终端能力或具体技术方案，研发评审后才能锁定范围。</li>
+<li>待确认项中出现的“建议”只用于帮助评审，不代表最终决定。</li>
+<li>本阶段交付物为 PRD 和产品原型，不包含开发交付；方案仍按真实可用产品设计，并纳入后端成本与技术可行性评估，不能依赖纯演示假数据完成闭环。</li>
+<li>本文将 <a href="https://a.zhique.cn/home" target="_blank" rel="noreferrer">a.zhique.cn</a> 提供的生成、托管、版本和内容摘要能力统称为“现有教学作品生成服务”；产品名称统一为 <strong>Teeko</strong>。</li>
+</ul>
+<hr>
+<h2 id="1-需求背景">1. 需求背景<a class="heading-anchor" href="#1-需求背景" aria-label="链接到本节">#</a></h2><h3 id="11-项目背景">1.1 项目背景<a class="heading-anchor" href="#11-项目背景" aria-label="链接到本节">#</a></h3><p>Teeko 面向学校采购、教师个人使用的场景。学校采购使用权益并向教师发放激活码；教师通过个人账号完成备课、授课和课后复盘；学生使用平板扫描当堂二维码，以匿名方式参与课堂。</p>
+<p>本期需要交付可真实使用的最小产品，用于验证学校采购意愿、教师备课与课堂使用意愿，以及“课堂报告进入下一次备课”的连续使用价值。产品复用现有教学作品生成服务，打通备课、授课、互动、报告和继续备课。</p>
+<p>“轻量化”是控制研发成本、缩短市场验证周期的内部实现约束，不是面向学校或教师的核心购买理由。</p>
+<h3 id="12-主要解决的问题">1.2 主要解决的问题<a class="heading-anchor" href="#12-主要解决的问题" aria-label="链接到本节">#</a></h3><h4 id="教师侧">教师侧<a class="heading-anchor" href="#教师侧" aria-label="链接到本节">#</a></h4><ol>
+<li><strong>备课产出成本高</strong>：教师需要从教学要求或已有教案快速形成可直接授课的教学作品，而不是在多个工具之间重复整理内容。</li>
+<li><strong>备课与课堂割裂</strong>：生成的内容需要直接进入真实课堂，并能与正式答题、投票和即时反馈协同使用。</li>
+<li><strong>互动反馈零散</strong>：教师需要低操作成本地获得全班整体理解情况，而不是依赖举手、口头询问或课后手工汇总。</li>
+<li><strong>课堂结束后缺少复盘</strong>：课堂数据需要自动整理为教师可阅读的整体报告，帮助教师复盘本节课。</li>
+<li><strong>下一次备课没有承接</strong>：教师应能主动把本次课堂的整体反馈带入下一次备课，形成连续教学，而不需要建立班级或追踪学生个人。</li>
+</ol>
+<h4 id="学校侧">学校侧<a class="heading-anchor" href="#学校侧" aria-label="链接到本节">#</a></h4><ol>
+<li>为教师提供能较快落地、学习成本较低的 AI 教学工具；</li>
+<li>通过学校统一采购、教师个人使用的方式降低部署与管理复杂度；</li>
+<li>让采购价值落在教师备课效率和真实课堂使用上，而不是增加新的学校管理负担。</li>
+</ol>
+<h3 id="13-核心业务闭环要求">1.3 核心业务闭环要求<a class="heading-anchor" href="#13-核心业务闭环要求" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>业务阶段</th>
+<th>产品要求</th>
+<th>形成的结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>获取权益</td>
+<td>学校采购并向教师发放激活码</td>
+<td>教师个人账号获得使用权益</td>
+</tr>
+<tr>
+<td>备课</td>
+<td>教师输入教学要求、上传教案，或从平台资源/课堂报告开始</td>
+<td>生成教学作品与配套题；教师在编辑页确认后保存为个人教学作品</td>
+</tr>
+<tr>
+<td>配套题</td>
+<td>AI 基于最终教学作品自动生成独立正式题</td>
+<td>教师获得可按需发布的题目</td>
+</tr>
+<tr>
+<td>互动课堂</td>
+<td>学生平板匿名扫码，且只读跟随教师教学内容</td>
+<td>形成真实的当堂参与环境</td>
+</tr>
+<tr>
+<td>课堂互动</td>
+<td>教师发布正式题、投票或信号灯</td>
+<td>形成匿名的课堂整体数据</td>
+</tr>
+<tr>
+<td>课堂报告</td>
+<td>系统整理整堂课堂的整体反馈</td>
+<td>教师获得个人复盘依据</td>
+</tr>
+<tr>
+<td>继续备课</td>
+<td>教师主动选择报告反馈进入新一轮备课</td>
+<td>建立连续教学闭环</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-产品定位目标与非目标">2. 产品定位、目标与非目标<a class="heading-anchor" href="#2-产品定位目标与非目标" aria-label="链接到本节">#</a></h2><h3 id="21-一句话定位">2.1 一句话定位<a class="heading-anchor" href="#21-一句话定位" aria-label="链接到本节">#</a></h3><p>Teeko 是一款由学校购买权益、教师以个人账号使用的 AI 教学产品，帮助教师快速生成教学作品，在课堂中组织匿名互动，并把课堂整体反馈带入下一次备课。</p>
+<h3 id="22-本次目标">2.2 本次目标<a class="heading-anchor" href="#22-本次目标" aria-label="链接到本节">#</a></h3><ol>
+<li>交付一条真实可用、可以由市场验证的最小业务闭环；</li>
+<li>教师可以从独立备课入口、平台资源或历史报告开始新一轮备课；</li>
+<li>教学作品可直接用于课堂，不限定为 PPT；</li>
+<li>学生扫码即可进入课堂，无账号、无姓名、无长期身份；</li>
+<li>正式题、投票和信号灯能产生真实的课堂整体数据；</li>
+<li>课堂结束后生成教师个人报告，并由教师主动带入下一次备课；</li>
+<li>复用现有教学作品生成服务，把研发集中在个人资产、互动课堂和报告闭环；</li>
+<li>原型覆盖正常流程、关键异常、权限状态和必要的空状态，支持研发评审。</li>
+</ol>
+<h3 id="23-产品价值优先级">2.3 产品价值优先级<a class="heading-anchor" href="#23-产品价值优先级" aria-label="链接到本节">#</a></h3><figure class="code-block"><figcaption>text</figcaption><pre><code>第一价值顺序：备课与个人教学作品
+第二价值顺序：学生同步与课堂互动
+第三价值顺序：课堂报告与继续备课</code></pre></figure><p>三段均为首版闭环的必备部分。该顺序用于分配产品价值和研发投入：报告可以先降低分析深度，但不能删除“生成整体报告并进入下一次备课”的能力。本节的“价值顺序”与第 18 章待确认事项的 P0/P1/P2 严重级别不是同一概念。</p>
+<h3 id="24-本期范围边界">2.4 本期范围边界<a class="heading-anchor" href="#24-本期范围边界" aria-label="链接到本节">#</a></h3><p>首版不做：</p>
+<ul>
+<li>学校管理端；</li>
+<li>学校人员、教师、学生或班级管理；</li>
+<li>学期、年级、课程表、教学结构管理；</li>
+<li>学校资源库；</li>
+<li>学校级资源上传与共享；</li>
+<li>学生账号、学生姓名和学号；</li>
+<li>长期学生身份、个人学情档案与跨课堂学生追踪；</li>
+<li>学校级课堂数据看板；</li>
+<li>简答题；</li>
+<li>除投票、信号灯之外的课堂小工具；</li>
+<li>教师将个人作品发布到资源广场；</li>
+<li>平台资源自带正式题目；</li>
+<li>教学作品 PDF 导出。</li>
+</ul>
+<h3 id="25-成功衡量">2.5 成功衡量<a class="heading-anchor" href="#25-成功衡量" aria-label="链接到本节">#</a></h3><p>首版建议至少埋点以下指标，具体目标值均为<strong>待确认</strong>：</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>指标</th>
+<th>目标值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>激活</td>
+<td>激活码兑换成功率、激活后首次备课率</td>
+<td>待确认</td>
+</tr>
+<tr>
+<td>备课</td>
+<td>生成成功率、从开始备课到作品可用的时长、作品保存率</td>
+<td>待确认</td>
+</tr>
+<tr>
+<td>课堂</td>
+<td>有效开课率、扫码加入成功率、学生同步成功率、互动发布率</td>
+<td>待确认</td>
+</tr>
+<tr>
+<td>报告</td>
+<td>报告生成成功率、报告查看率</td>
+<td>待确认</td>
+</tr>
+<tr>
+<td>闭环</td>
+<td>从报告发起下一次备课的比例</td>
+<td>待确认</td>
+</tr>
+<tr>
+<td>留存</td>
+<td>教师 7 日 / 30 日回访率、重复开课率</td>
+<td>待确认</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="3-用户场景与权限边界">3. 用户、场景与权限边界<a class="heading-anchor" href="#3-用户场景与权限边界" aria-label="链接到本节">#</a></h2><h3 id="31-用户角色">3.1 用户角色<a class="heading-anchor" href="#31-用户角色" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>角色</th>
+<th>身份与场景</th>
+<th>产品内主要能力</th>
+<th>明确限制</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>学校采购方</td>
+<td>采购使用权益并把激活码发给教师</td>
+<td>产品外完成采购和分发</td>
+<td>产品内没有学校管理端；能否查看激活状态待确认</td>
+</tr>
+<tr>
+<td>教师</td>
+<td>有个人账号的核心用户</td>
+<td>激活、备课、管理个人作品、开课、查看个人课堂历史与报告、继续备课</td>
+<td>不能管理学校、班级或长期学生身份</td>
+</tr>
+<tr>
+<td>匿名学生</td>
+<td>使用平板扫描当堂二维码</td>
+<td>只读跟随教学内容、回答正式题、参与投票和信号灯、查看已公布结果</td>
+<td>无账号；不输入姓名/学号；不能长期访问课堂历史；不能操作教学作品</td>
+</tr>
+<tr>
+<td>平台运营</td>
+<td>向学校交付激活码，维护平台资源广场</td>
+<td>运营侧能力支撑学校采购与平台资源供给</td>
+<td>运营后台是否纳入本期原型及具体功能待确认</td>
+</tr>
+</tbody></table></div>
+<h3 id="32-权限原则">3.2 权限原则<a class="heading-anchor" href="#32-权限原则" aria-label="链接到本节">#</a></h3><ol>
+<li>学校购买的是使用权益，不在产品内管理教师内容和课堂数据。</li>
+<li>教师个人作品库、收藏、课堂历史和报告关联教师个人账号；法律与商业意义上的资产归属仍待确认。</li>
+<li>学生不付费、不登录，只在当前课堂 Session 中获得现场生成的临时编号。</li>
+<li>学生临时编号不得被用于跨课堂识别，也不得出现在长期个人画像中。</li>
+<li>学校能否查看教师是否激活、是否使用以及是否有权撤回权益：<strong>待确认</strong>。</li>
+<li>教师授权到期后的查看、编辑、开课权限：<strong>待确认</strong>，详见第 13 章。</li>
+</ol>
+<h3 id="33-核心使用场景">3.3 核心使用场景<a class="heading-anchor" href="#33-核心使用场景" aria-label="链接到本节">#</a></h3><ol>
+<li>教师输入教学要求，或上传已有教案，生成教学作品；</li>
+<li>教师从平台资源广场选择资源，复制为个人版本后修改；</li>
+<li>教师查看个人作品并创建课堂；</li>
+<li>学生使用平板扫码进入，跟随教师内容并参与互动；</li>
+<li>教师课后查看整体报告；</li>
+<li>教师选择报告中的反馈，进入下一次独立备课。</li>
+</ol>
+<hr>
+<h2 id="4-产品范围与信息架构">4. 产品范围与信息架构<a class="heading-anchor" href="#4-产品范围与信息架构" aria-label="链接到本节">#</a></h2><h3 id="41-教师端一级入口">4.1 教师端一级入口<a class="heading-anchor" href="#41-教师端一级入口" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>一级入口</th>
+<th>二级页面 / 能力</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>首页</td>
+<td>默认展示对话式备课输入区，可直接输入教学要求或上传教案并发起生成；同时展示最近作品、进行中的生成任务、最近课堂报告和授权提醒</td>
+</tr>
+<tr>
+<td>备课</td>
+<td>新建备课、生成进度、教学作品详情/编辑、配套题管理</td>
+</tr>
+<tr>
+<td>资源广场</td>
+<td>平台资源列表、筛选/搜索（待确认）、资源详情、收藏、使用并修改</td>
+</tr>
+<tr>
+<td>个人作品库</td>
+<td>已保存个人作品列表、保存状态、打开编辑、创建课堂</td>
+</tr>
+<tr>
+<td>课堂历史</td>
+<td>历史课堂列表、报告状态、报告详情、继续备课</td>
+</tr>
+<tr>
+<td>账号与权益</td>
+<td>登录、激活码兑换、授权状态、退出登录；其他信息待确认</td>
+</tr>
+</tbody></table></div>
+<h3 id="42-学生端页面">4.2 学生端页面<a class="heading-anchor" href="#42-学生端页面" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>页面</th>
+<th>主要用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>扫码校验页</td>
+<td>校验课堂并创建当堂匿名参与者</td>
+</tr>
+<tr>
+<td>候课页</td>
+<td>显示临时编号及等待教师开始</td>
+</tr>
+<tr>
+<td>教学内容页</td>
+<td>只读同步教师正在展示和操作的内容</td>
+</tr>
+<tr>
+<td>正式答题页</td>
+<td>回答单选、多选、判断题</td>
+</tr>
+<tr>
+<td>投票页</td>
+<td>回答教师现场创建的 2–4 选项投票</td>
+</tr>
+<tr>
+<td>信号灯页</td>
+<td>提交即时理解反馈</td>
+</tr>
+<tr>
+<td>结果页</td>
+<td>查看个人结果及教师已公布的全班分布</td>
+</tr>
+<tr>
+<td>课堂结束页</td>
+<td>提示本堂课已经结束</td>
+</tr>
+</tbody></table></div>
+<h3 id="43-核心能力范围">4.3 核心能力范围<a class="heading-anchor" href="#43-核心能力范围" aria-label="链接到本节">#</a></h3><ul>
+<li>学校激活码与教师个人授权；</li>
+<li>教师登录与个人内容资产；</li>
+<li>教学要求输入和教案上传；</li>
+<li>调用现有教学作品生成服务生成多形态教学作品；</li>
+<li>从平台资源建立可修改的个人版本；</li>
+<li>基于教学作品自动生成配套正式题；</li>
+<li>个人作品管理；</li>
+<li>创建课堂和学生二维码加入；</li>
+<li>学生端只读内容同步；</li>
+<li>正式题、投票、信号灯；</li>
+<li>匿名课堂整体统计；</li>
+<li>教师个人课堂历史与课堂报告；</li>
+<li>从报告主动继续备课。</li>
+</ul>
+<hr>
+<h2 id="5-核心业务对象与数据关系">5. 核心业务对象与数据关系<a class="heading-anchor" href="#5-核心业务对象与数据关系" aria-label="链接到本节">#</a></h2><h3 id="51-业务对象">5.1 业务对象<a class="heading-anchor" href="#51-业务对象" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>对象</th>
+<th>说明</th>
+<th>关键字段/关系</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>教师账号</td>
+<td>教师的长期登录身份</td>
+<td>账号 ID、授权状态、个人资产关系</td>
+</tr>
+<tr>
+<td>使用权益</td>
+<td>由学校购买并通过激活码分配</td>
+<td>激活码、权益状态；生效/到期规则待确认</td>
+</tr>
+<tr>
+<td>平台资源</td>
+<td>平台提供的教学内容</td>
+<td>资源 ID、作品链接/版本、摘要；不含正式题</td>
+</tr>
+<tr>
+<td>个人教学作品</td>
+<td>教师在 T06 对生成或改编结果明确保存后形成的内容资产</td>
+<td>作品 ID、标题、学科、教学语言、来源、当前版本</td>
+</tr>
+<tr>
+<td>作品版本</td>
+<td>现有教学作品生成服务返回的不可变内容版本</td>
+<td>版本 ID、托管 HTML 链接、内容摘要</td>
+</tr>
+<tr>
+<td>配套题</td>
+<td>依附个人教学作品的正式课堂题目</td>
+<td>题型、题干、选项、答案、解析、仅 PPT 可选页面关联；内部可记录生成时版本 ID</td>
+</tr>
+<tr>
+<td>课堂 Session</td>
+<td>一次独立授课</td>
+<td>课堂 ID、作品快照、状态、二维码、当前内容状态</td>
+</tr>
+<tr>
+<td>匿名参与者</td>
+<td>只在一个 Session 中存在的学生</td>
+<td>临时编号、连接状态、当轮最后有效提交</td>
+</tr>
+<tr>
+<td>互动轮次</td>
+<td>一组正式题、一次投票或一次信号灯发布</td>
+<td>类型、题目 ID 列表/内容快照、收集状态、匿名汇总；正式题按题保存统计</td>
+</tr>
+<tr>
+<td>课堂报告</td>
+<td>一次课堂的整体复盘</td>
+<td>基础信息、互动汇总、继续备课上下文；是否包含 AI 文字复盘待确认</td>
+</tr>
+</tbody></table></div>
+<h3 id="52-数据关系">5.2 数据关系<a class="heading-anchor" href="#52-数据关系" aria-label="链接到本节">#</a></h3><figure class="mermaid-block"><figcaption>核心业务对象数据关系</figcaption><div class="mermaid">erDiagram
+    TEACHER ||--o{ ENTITLEMENT : redeems
+    TEACHER ||--o{ PERSONAL_WORK : owns
+    TEACHER ||--o{ CLASS_SESSION : conducts
+    PLATFORM_RESOURCE o|--o{ PERSONAL_WORK : optional_source
+    PERSONAL_WORK ||--o{ WORK_VERSION : contains
+    PERSONAL_WORK ||--o{ PAIRED_QUESTION : has
+    CLASS_SESSION }o--|| WORK_VERSION : freezes
+    CLASS_SESSION ||--o{ ANONYMOUS_PARTICIPANT : contains
+    CLASS_SESSION ||--o{ INTERACTION_ROUND : records
+    CLASS_SESSION ||--|| CLASS_REPORT : produces
+    CLASS_REPORT o|--o{ PERSONAL_WORK : optional_context_for</div></figure><h3 id="53-快照原则">5.3 快照原则<a class="heading-anchor" href="#53-快照原则" aria-label="链接到本节">#</a></h3><ol>
+<li>每堂课堂必须在正式开始前冻结当前已保存的教学作品不可变版本及配套题快照；是在“创建课堂”还是“开始课堂”时冻结：<strong>待确认</strong>。</li>
+<li>课堂快照冻结后，教师继续编辑个人作品不改变该课堂。</li>
+<li>同一作品可多次开课，每次课堂、作答与报告互相独立。</li>
+<li>报告继续备课会生成新的未保存作品结果；教师保存后形成独立个人作品，不覆盖来源作品或来源报告。</li>
+<li>删除个人作品是否影响尚未开始或进行中的课堂：<strong>待确认</strong>。</li>
+</ol>
+<hr>
+<h2 id="6-端到端业务闭环">6. 端到端业务闭环<a class="heading-anchor" href="#6-端到端业务闭环" aria-label="链接到本节">#</a></h2><figure class="mermaid-block"><figcaption>端到端业务闭环</figcaption><div class="mermaid">flowchart TD
+    A[学校采购并向教师发放激活码] --&gt; B[教师登录个人账号并激活]
+    B --&gt; C{选择备课起点}
+    C --&gt;|首页对话式备课/独立备课| D[输入要求和/或上传教案\n按需选择学科与教学语言]
+    C --&gt;|资源广场| E[预览资源\n收藏或使用并修改]
+    C --&gt;|课堂报告| F[选择要带入的课堂反馈]
+    E --&gt; G[建立可编辑资源草稿]
+    F --&gt; D
+    D --&gt; H[调用现有服务生成教学作品]
+    G --&gt; H2[编辑资源草稿]
+    H --&gt; I[取得不可变版本、托管链接和内容摘要]
+    H2 --&gt; I
+    I --&gt; J[AI 自动生成配套正式题]
+    J --&gt; K[进入 T06 编辑页\n状态为未保存]
+    K --&gt; L[教师选择保存]
+    L --&gt; M[作品与题目进入个人作品库]
+    M --&gt; N[创建课堂并展示二维码]
+    N --&gt; O[学生平板匿名扫码加入]
+    O --&gt; P[学生只读同步教师教学内容]
+    P --&gt; Q[教师按需发布正式题/投票/信号灯]
+    Q --&gt; R[收集匿名作答并显示整体结果]
+    R --&gt; S[教师结束课堂]
+    S --&gt; T[生成整体课堂报告\n自动或手动触发待确认]
+    T --&gt; U[教师查看并选择反馈]
+    U --&gt; F</div></figure><h3 id="61-三条备课入口的汇合点">6.1 三条备课入口的汇合点<a class="heading-anchor" href="#61-三条备课入口的汇合点" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>起点</th>
+<th>教师提供/选择</th>
+<th>系统补充</th>
+<th>汇合结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>首页对话式备课/独立备课</td>
+<td>教学要求和/或教案；学科、教学语言均为可选补充</td>
+<td>调用现有服务生成；未选择的学科或语言不作为显式约束</td>
+<td>待教师确认保存的教学作品结果与配套题</td>
+</tr>
+<tr>
+<td>资源广场</td>
+<td>平台资源，之后可修改</td>
+<td>建立可编辑草稿，并自动生成配套题</td>
+<td>待教师确认保存的教学作品结果与配套题</td>
+</tr>
+<tr>
+<td>课堂报告</td>
+<td>教师主动选择的上一课反馈，并填写新要求</td>
+<td>带入报告上下文后调用现有服务生成</td>
+<td>待教师确认保存的新教学作品结果与配套题</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="7-页面清单与导航关系">7. 页面清单与导航关系<a class="heading-anchor" href="#7-页面清单与导航关系" aria-label="链接到本节">#</a></h2><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>页面 ID</th>
+<th>页面名称</th>
+<th>主要入口</th>
+<th>成功后的主要去向</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>T01</td>
+<td>账号进入</td>
+<td>产品入口</td>
+<td>T02 权益激活或 T03 首页</td>
+</tr>
+<tr>
+<td>T02</td>
+<td>权益激活</td>
+<td>未激活登录、账号与权益</td>
+<td>T03 首页</td>
+</tr>
+<tr>
+<td>T03</td>
+<td>教师首页</td>
+<td>登录成功</td>
+<td>可在首页对话区直接提交至 T05，也可前往 T04、T07、T09、T16</td>
+</tr>
+<tr>
+<td>T04</td>
+<td>新建备课</td>
+<td>备课导航、报告继续备课</td>
+<td>T05 生成进度</td>
+</tr>
+<tr>
+<td>T05</td>
+<td>生成进度</td>
+<td>首页对话区或 T04 提交生成、首页任务卡</td>
+<td>T06 作品详情/编辑</td>
+</tr>
+<tr>
+<td>T06</td>
+<td>作品详情/编辑</td>
+<td>生成完成（未保存）、个人作品库、资源复制</td>
+<td>未保存时留在本页；保存后可前往 T12 候课室</td>
+</tr>
+<tr>
+<td>T07</td>
+<td>资源广场/我的收藏</td>
+<td>首页/导航</td>
+<td>T08 资源详情</td>
+</tr>
+<tr>
+<td>T08</td>
+<td>资源详情</td>
+<td>资源广场</td>
+<td>收藏后留在本页；使用后到 T05/T06</td>
+</tr>
+<tr>
+<td>T09</td>
+<td>个人作品库</td>
+<td>首页/导航</td>
+<td>T06</td>
+</tr>
+<tr>
+<td>T12</td>
+<td>教师候课室</td>
+<td>创建课堂成功</td>
+<td>T13 教师授课页</td>
+</tr>
+<tr>
+<td>T13</td>
+<td>教师授课页</td>
+<td>开始课堂/恢复课堂</td>
+<td>T14 报告生成页</td>
+</tr>
+<tr>
+<td>T14</td>
+<td>报告生成页</td>
+<td>结束课堂</td>
+<td>T15 报告详情</td>
+</tr>
+<tr>
+<td>T15</td>
+<td>报告详情</td>
+<td>报告生成完成、课堂历史</td>
+<td>T04 新建备课</td>
+</tr>
+<tr>
+<td>T16</td>
+<td>课堂历史</td>
+<td>首页/导航</td>
+<td>T15</td>
+</tr>
+<tr>
+<td>S01</td>
+<td>学生扫码校验</td>
+<td>扫描二维码</td>
+<td>S02 候课或 S03 课堂内容</td>
+</tr>
+<tr>
+<td>S02</td>
+<td>学生候课页</td>
+<td>扫码加入候课中课堂</td>
+<td>S03 课堂内容</td>
+</tr>
+<tr>
+<td>S03</td>
+<td>学生教学内容页</td>
+<td>课堂开始/互动结束</td>
+<td>S04/S05/S06 互动页</td>
+</tr>
+<tr>
+<td>S04</td>
+<td>学生正式答题页</td>
+<td>教师发布正式题</td>
+<td>S07 结果或 S03</td>
+</tr>
+<tr>
+<td>S05</td>
+<td>学生投票页</td>
+<td>教师发布投票</td>
+<td>S07 结果或 S03</td>
+</tr>
+<tr>
+<td>S06</td>
+<td>学生信号灯页</td>
+<td>教师发起信号灯</td>
+<td>S07 结果或 S03</td>
+</tr>
+<tr>
+<td>S07</td>
+<td>学生结果页</td>
+<td>教师公布结果</td>
+<td>S03</td>
+</tr>
+<tr>
+<td>S08</td>
+<td>学生课堂结束页</td>
+<td>教师结束课堂</td>
+<td>终态</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="8-详细用户流程">8. 详细用户流程<a class="heading-anchor" href="#8-详细用户流程" aria-label="链接到本节">#</a></h2><h3 id="81-登录与激活">8.1 登录与激活<a class="heading-anchor" href="#81-登录与激活" aria-label="链接到本节">#</a></h3><p>当前仅确认“学校采购并向教师发放激活码”和“教师登录个人账号”。登录方式、激活码生命周期等尚未确认，因此流程保留产品状态，但不锁定实现细节。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>用户做什么</th>
+<th>系统做什么</th>
+<th>页面状态</th>
+<th>成功后去哪</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>教师提交账号进入凭证</td>
+<td>验证教师身份；账号如何获得待确认</td>
+<td>初始 → 提交中 → 成功/失败</td>
+<td>未激活去 T02；已激活去 T03</td>
+</tr>
+<tr>
+<td>2</td>
+<td>未激活教师输入学校发放的激活码</td>
+<td>校验激活码并尝试绑定当前账号</td>
+<td>待输入 → 校验中 → 成功/失败</td>
+<td>T03 教师首页</td>
+</tr>
+<tr>
+<td>3</td>
+<td>教师进入首页</td>
+<td>加载对话式备课输入区、个人作品、生成任务、课堂历史与权益状态</td>
+<td>骨架屏 → 可输入/有内容/空状态/失败</td>
+<td>可直接提交生成，或按教师选择继续</td>
+</tr>
+</tbody></table></div>
+<p><strong>待确认</strong>：</p>
+<ul>
+<li>登录方式（邮箱验证码、手机验证码、密码或第三方登录）；</li>
+<li>账号由教师自行注册、学校预创建还是平台创建；</li>
+<li>是否允许先浏览后激活；</li>
+<li>激活码是否一人一码、是否一次兑换、是否有有效期；</li>
+<li>一个教师账号能否叠加多个激活码；</li>
+<li>激活从采购日、发码日还是兑换日开始；</li>
+<li>激活码输错、过期、已使用时的具体文案；</li>
+<li>账号更换、激活码错绑和申诉流程。</li>
+</ul>
+<h3 id="82-首页对话式备课与独立备课">8.2 首页对话式备课与独立备课<a class="heading-anchor" href="#82-首页对话式备课与独立备课" aria-label="链接到本节">#</a></h3><h4 id="821-输入规则">8.2.1 输入规则<a class="heading-anchor" href="#821-输入规则" aria-label="链接到本节">#</a></h4><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>规则</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>学科</td>
+<td>可选；目标是支持全部学科。教师选择后作为明确生成约束，未选择时不阻止生成</td>
+</tr>
+<tr>
+<td>教学语言</td>
+<td>可选；可选值为繁体中文或英文。教师选择后作为明确生成约束，未选择时不阻止生成</td>
+</tr>
+<tr>
+<td>年级</td>
+<td>不提供，不作为必填信息</td>
+</tr>
+<tr>
+<td>教学要求/提示词</td>
+<td>与教案至少提供一项</td>
+</tr>
+<tr>
+<td>教案文件</td>
+<td>可上传；与教学要求至少提供一项</td>
+</tr>
+</tbody></table></div>
+<p><strong>待确认</strong>：学科采用固定列表、搜索选择还是自由输入；未选择学科或教学语言时，现有教学作品生成服务的自动识别与兜底规则；教案支持的格式、大小、数量、页数、扫描件及加密文件规则。</p>
+<h4 id="822-首页对话式备课入口">8.2.2 首页对话式备课入口<a class="heading-anchor" href="#822-首页对话式备课入口" aria-label="链接到本节">#</a></h4><ol>
+<li>教师登录成功进入 T03 后，首屏主操作必须是对话式备课输入区，不以宣传横幅或“开始备课”按钮作为主要起点；</li>
+<li>教师可直接输入教学要求，也可只上传教案；两者至少提供一项；</li>
+<li>学科和教学语言作为可选设置显示在对话输入区底部，不应使用必填标记；</li>
+<li>“上传教案”入口固定在对话输入区左下角；“生成教学作品”作为主要操作位于底部操作区另一侧；</li>
+<li>首页提交后直接创建生成任务并进入 T05，不要求先跳转 T04；</li>
+<li>T04 独立备课页继续保留，与首页共用相同输入和校验规则，用于从备课导航进入或承接报告继续备课。</li>
+</ol>
+<h4 id="823-正常流程">8.2.3 正常流程<a class="heading-anchor" href="#823-正常流程" aria-label="链接到本节">#</a></h4><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>用户做什么</th>
+<th>系统做什么</th>
+<th>页面状态</th>
+<th>成功后去哪</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>登录后在首页对话区开始输入，或从备课导航进入 T04</td>
+<td>创建未提交的备课草稿</td>
+<td>首页对话输入态或 T04 初始空表单</td>
+<td>留在当前页</td>
+</tr>
+<tr>
+<td>2</td>
+<td>输入要求和/或上传教案；按需选择学科、教学语言</td>
+<td>校验教学要求与教案至少存在一项；上传并解析教案</td>
+<td>编辑中/上传中/解析中/文件就绪</td>
+<td>留在当前页</td>
+</tr>
+<tr>
+<td>3</td>
+<td>点击“生成教学作品”</td>
+<td>创建生成任务并调用现有教学作品生成服务</td>
+<td>提交中</td>
+<td>T05 生成进度</td>
+</tr>
+<tr>
+<td>4</td>
+<td>等待；是否允许离开页面待确认</td>
+<td>持续处理生成任务</td>
+<td>排队中/生成中</td>
+<td>T05；若支持后台任务则可从首页恢复</td>
+</tr>
+<tr>
+<td>5</td>
+<td>无需操作</td>
+<td>暂存作品 ID、不可变版本 ID、托管 HTML 链接和内容摘要，不写入个人作品库</td>
+<td>内容生成成功</td>
+<td>配套题生成状态</td>
+</tr>
+<tr>
+<td>6</td>
+<td>无需操作</td>
+<td>基于最终教学作品自动生成配套正式题</td>
+<td>题目生成中/成功/失败</td>
+<td>T06 作品详情/编辑</td>
+</tr>
+<tr>
+<td>7</td>
+<td>预览、修改并选择“保存到我的作品”</td>
+<td>保存成功后，作品与题目才进入个人作品库；保存前不得出现在 T09</td>
+<td>未保存/编辑中/保存中/已保存/保存失败</td>
+<td>保存后留在 T06，也可开课</td>
+</tr>
+</tbody></table></div>
+<h4 id="824-内容输入优先级">8.2.4 内容输入优先级<a class="heading-anchor" href="#824-内容输入优先级" aria-label="链接到本节">#</a></h4><p>教师明确选择的学科和教学语言必须作为生成约束；未选择时不得阻止提交，也不向生成服务传入虚假的教师选择值。教学要求与上传教案发生冲突时的优先级：<strong>待确认</strong>。建议采用“教师明确填写的补充要求 ＞ 教案原文”。</p>
+<h4 id="825-生成任务规则">8.2.5 生成任务规则<a class="heading-anchor" href="#825-生成任务规则" aria-label="链接到本节">#</a></h4><ul>
+<li>生成完成后进入 T06，并明确标记为“未保存”；只有教师主动保存成功后，作品与配套题才进入个人作品库。</li>
+<li>教学作品不限定为 PPT，可以是托管 HTML、分页内容、动画、互动游戏或现有教学作品生成服务支持的其他形态。</li>
+<li>作品应具有不可变版本、可访问链接和内容摘要，以便开课快照、自动出题和报告引用。</li>
+<li>教师离开页面后生成是否继续、任务是否支持取消、重复点击如何保证幂等：<strong>待确认</strong>；后台完成的未保存结果应从首页任务卡、T05 或 T06 恢复，不得直接进入 T09。</li>
+<li><strong>待确认（技术核验）</strong>：现有教学作品生成服务是否提供作品编辑入口；从平台资源改编或教师修改内容后，如何返回新的不可变版本、托管链接及更新后的摘要。若现有能力不支持，首版可修改范围必须在原型定稿前收缩并明确。</li>
+</ul>
+<h3 id="83-从资源广场备课">8.3 从资源广场备课<a class="heading-anchor" href="#83-从资源广场备课" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>用户做什么</th>
+<th>系统做什么</th>
+<th>页面状态</th>
+<th>成功后去哪</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>进入资源广场</td>
+<td>加载平台提供的资源</td>
+<td>加载中/列表/空/失败</td>
+<td>T07</td>
+</tr>
+<tr>
+<td>2</td>
+<td>选择某项资源</td>
+<td>加载资源详情和可预览内容</td>
+<td>加载中/可预览/加载失败</td>
+<td>T08</td>
+</tr>
+<tr>
+<td>3A</td>
+<td>点击“收藏”</td>
+<td>保存该平台资源的收藏关系</td>
+<td>收藏中/已收藏/失败</td>
+<td>留在 T08</td>
+</tr>
+<tr>
+<td>3B</td>
+<td>点击“使用并修改”</td>
+<td>基于平台资源建立未保存、可编辑的教师草稿</td>
+<td>复制中/成功/失败</td>
+<td>T06 或生成进度</td>
+</tr>
+<tr>
+<td>4</td>
+<td>无需操作，或按需修改草稿</td>
+<td>基于草稿内容自动生成配套正式题</td>
+<td>题目生成中/成功/失败</td>
+<td>T06</td>
+</tr>
+<tr>
+<td>5</td>
+<td>点击“保存到我的作品”</td>
+<td>将草稿与配套题保存为教师独立资产，不影响平台原资源</td>
+<td>保存中/已保存/保存失败</td>
+<td>T06</td>
+</tr>
+</tbody></table></div>
+<p>规则：</p>
+<ul>
+<li>平台资源由平台提供，不是学校资源；</li>
+<li>平台资源本身不含正式题目；</li>
+<li>收藏只建立收藏关系；“使用并修改”只建立可编辑草稿，教师明确保存后才形成个人版本；</li>
+<li>资源广场需提供“我的收藏”视图，教师可从收藏记录重新进入资源详情；</li>
+<li>教师修改个人版本不影响平台原资源；</li>
+<li>同一资源能否多次创建多个个人版本：<strong>待确认</strong>；</li>
+<li>平台资源更新或下架后，已保存个人版本是否继续可用：<strong>待确认</strong>，建议继续可用；</li>
+<li>资源广场的搜索、筛选、分类、排序和推荐规则：<strong>待确认</strong>。</li>
+<li>是否支持取消收藏、收藏资源下架后的展示与清理规则：<strong>待确认</strong>。</li>
+</ul>
+<h3 id="84-教学作品与配套题">8.4 教学作品与配套题<a class="heading-anchor" href="#84-教学作品与配套题" aria-label="链接到本节">#</a></h3><h4 id="841-配套题从哪里来">8.4.1 配套题从哪里来<a class="heading-anchor" href="#841-配套题从哪里来" aria-label="链接到本节">#</a></h4><ol>
+<li>独立生成教学作品：以最终作品的内容摘要为基础，由 AI 自动生成配套题；</li>
+<li>平台资源：资源本身不含题；教师建立可编辑草稿后，由 AI 自动生成配套题，草稿与题目由教师一并确认保存；</li>
+<li>报告继续备课：新作品生成完成后，按新作品内容自动生成新的配套题；</li>
+<li>教师不需要在备课阶段确认 AI 题目，课堂上是否真正发布由教师决定；</li>
+<li>页面和报告不标注题目来源。</li>
+</ol>
+<h4 id="842-题型与关联">8.4.2 题型与关联<a class="heading-anchor" href="#842-题型与关联" aria-label="链接到本节">#</a></h4><ul>
+<li>只支持单选题、多选题、判断题；不支持简答题。</li>
+<li>每道题属于整个教学作品。</li>
+<li>仅 PPT 可以选择关联某一页；此关联只作提示，不限制发布时机。</li>
+<li>所有非 PPT 作品均只关联整份作品，即使 HTML 内部存在分页、路由或场景，也不建立正式题的页关联。</li>
+<li>教学作品内部自带的练习、按钮或游戏行为属于教学内容，不属于 Teeko 正式答题，不收集到正式题统计和课堂报告。</li>
+</ul>
+<h4 id="843-教师操作">8.4.3 教师操作<a class="heading-anchor" href="#843-教师操作" aria-label="链接到本节">#</a></h4><ol>
+<li>新作品默认由 AI 自动生成 6 道配套题；题型只包含单选、多选和判断，三类题的默认数量组合为<strong>待确认</strong>；</li>
+<li>每个作品最多保存 25 道配套题，教师可在上限内修改、删除和手动新增；</li>
+<li>“重新生成 6 道题”会用新生成的 6 道题覆盖当前全部配套题，执行前必须二次确认；</li>
+<li>“追加生成 6 道题”每次固定追加 6 道，仅当追加后总数不超过 25 时可用；当前已有 20–25 道时不可追加，教师可先删除题目；</li>
+<li>题目重新生成无需“更新来源”概念，因为题目来源不展示；</li>
+<li>多选题采用完全匹配判分：所选答案与全部正确答案完全一致才算正确，不计算部分分；</li>
+<li>课堂开始后使用冻结的题目快照，授课过程中不允许编辑、删除、新增或重新生成本堂题目。</li>
+</ol>
+<p>教师后续修改教学内容时，不自动更新配套题；教师需要时可主动重新生成。PPT 删除某个关联页时，只取消题目与该页的关联，不删除题目。</p>
+<p><strong>待确认</strong>：</p>
+<ul>
+<li>默认 6 道题中单选/多选/判断题的数量组合；</li>
+<li>题干、选项、解析字数以及选项数量上限；</li>
+<li>教师删除全部题目后是否仍可开课（建议允许）。</li>
+</ul>
+<h3 id="85-个人作品保存与复用">8.5 个人作品保存与复用<a class="heading-anchor" href="#85-个人作品保存与复用" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>用户做什么</th>
+<th>系统做什么</th>
+<th>页面状态</th>
+<th>成功后去哪</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>生成完成后进入编辑页</td>
+<td>加载未保存教学作品结果、元数据和配套题；不写入个人作品库</td>
+<td>未保存/可编辑/失败</td>
+<td>T06</td>
+</tr>
+<tr>
+<td>2</td>
+<td>点击“保存到我的作品”</td>
+<td>幂等保存作品与配套题</td>
+<td>保存中/已保存/保存失败</td>
+<td>留在 T06</td>
+</tr>
+<tr>
+<td>3</td>
+<td>进入个人作品库并打开作品</td>
+<td>只加载已成功保存的个人作品</td>
+<td>加载中/空/列表/失败</td>
+<td>T09/T06</td>
+</tr>
+<tr>
+<td>4</td>
+<td>修改并保存</td>
+<td>保存新的内容版本、元数据或配套题</td>
+<td>已修改/保存中/已保存/保存失败</td>
+<td>留在 T06</td>
+</tr>
+<tr>
+<td>5</td>
+<td>选择创建课堂</td>
+<td>校验作品已保存后创建课堂 Session</td>
+<td>创建中/成功/失败</td>
+<td>T12</td>
+</tr>
+</tbody></table></div>
+<p>个人作品库必须保留：</p>
+<ul>
+<li>教师明确保存的独立生成作品；</li>
+<li>从资源广场保存的个人版本；</li>
+<li>各作品当前保存状态；</li>
+<li>与作品匹配的配套题；</li>
+<li>创建课堂入口。</li>
+</ul>
+<p><strong>待确认</strong>：作品搜索、筛选、排序、标签、文件夹、复制副本、删除与回收站规则，以及是否需要完整版本历史。</p>
+<h3 id="86-创建课堂与候课">8.6 创建课堂与候课<a class="heading-anchor" href="#86-创建课堂与候课" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>用户做什么</th>
+<th>系统做什么</th>
+<th>页面状态</th>
+<th>成功后去哪</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>在个人作品页点击“创建课堂”</td>
+<td>校验教师权限和作品可用性；创建 Session，并准备待冻结的作品版本与题目快照</td>
+<td>创建中/失败</td>
+<td>T12 候课室</td>
+</tr>
+<tr>
+<td>2</td>
+<td>展示二维码</td>
+<td>创建本堂课堂二维码并统计加入人数</td>
+<td>候课中/二维码失效</td>
+<td>留在 T12</td>
+</tr>
+<tr>
+<td>3</td>
+<td>学生使用平板扫码</td>
+<td>校验课堂，创建只在本堂有效的临时编号</td>
+<td>S01 校验中/失败</td>
+<td>S02 候课页</td>
+</tr>
+<tr>
+<td>4</td>
+<td>教师点击“开始课堂”</td>
+<td>将课堂切换为进行中并发布初始教学状态</td>
+<td>启动中/失败</td>
+<td>T13；学生去 S03</td>
+</tr>
+<tr>
+<td>5</td>
+<td>迟到学生在课堂进行中扫码</td>
+<td>创建本堂临时编号并同步当前教学或互动状态</td>
+<td>加入中/失败</td>
+<td>S03；若题组正在收集则进入 S04</td>
+</tr>
+</tbody></table></div>
+<p>创建课堂的前置条件：</p>
+<ul>
+<li>教学作品已由教师明确保存为个人作品；</li>
+<li>存在不可变版本和可访问的托管内容链接；</li>
+<li>作品可在学生端只读加载；</li>
+<li>教师具有创建课堂的有效权限，具体权益规则见第 13 章。</li>
+</ul>
+<p><strong>待确认</strong>：</p>
+<ul>
+<li>是否允许无配套题作品开课（建议允许）；</li>
+<li>是否允许 0 名学生开始课堂；</li>
+<li>同一教师能否同时存在多个候课中或进行中的课堂（建议只允许一个）；</li>
+<li>二维码、候课室和未开始课堂的有效时长；</li>
+<li>取消候课中的课堂是否进入课堂历史。</li>
+<li>作品与题目快照在点击“创建课堂”还是点击“开始课堂”时正式冻结。</li>
+</ul>
+<h3 id="87-学生匿名加入">8.7 学生匿名加入<a class="heading-anchor" href="#87-学生匿名加入" aria-label="链接到本节">#</a></h3><ol>
+<li>学生无需账号，不输入姓名、学号、班级或其他个人信息；</li>
+<li>系统现场生成一个仅在本堂课有效的临时编号；</li>
+<li>编号用于本堂课内去重、修改答案与连接恢复，不形成跨课堂身份；</li>
+<li>报告只展示整体汇总，不展示临时编号列表或编号答题轨迹；</li>
+<li>学生更换设备或无痕窗口时，系统无法可靠判断是否为同一个真实学生。</li>
+</ol>
+<p><strong>待确认</strong>：</p>
+<ul>
+<li>临时编号的格式和学生端是否持续展示；</li>
+<li>刷新或短暂断线后如何恢复原编号；</li>
+<li>同一设备重复扫码的去重规则；</li>
+<li>新设备重复进入是否按新匿名参与者计算；</li>
+<li>满员、二维码过期或课堂结束后的具体提示；</li>
+<li>课堂最大并发学生数。</li>
+<li>教师端是否显示临时编号/编号列表，还是只显示匿名人数；</li>
+<li>二维码被转发给非现场人员时的加入限制，以及教师是否可以移除某个匿名参与者。</li>
+</ul>
+<h3 id="88-教学内容只读同步">8.8 教学内容只读同步<a class="heading-anchor" href="#88-教学内容只读同步" aria-label="链接到本节">#</a></h3><h4 id="891-产品要求">8.9.1 产品要求<a class="heading-anchor" href="#891-产品要求" aria-label="链接到本节">#</a></h4><p>教师端是唯一控制端。学生平板必须只读显示教师正在播放或操作的教学内容，学生不能自行翻页、拖动、点击、改变参数或操作游戏。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>作品形态</th>
+<th>学生端预期效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PPT/分页内容</td>
+<td>跟随教师当前页或当前场景</td>
+</tr>
+<tr>
+<td>视频/时间轴动画</td>
+<td>跟随教师播放、暂停和当前进度</td>
+</tr>
+<tr>
+<td>普通 HTML</td>
+<td>跟随教师当前页面或场景</td>
+</tr>
+<tr>
+<td>3D 实验</td>
+<td>只读看到教师调整参数后的画面效果</td>
+</tr>
+<tr>
+<td>互动游戏</td>
+<td>只读看到教师当前游戏状态和操作结果</td>
+</tr>
+</tbody></table></div>
+<p>发布正式题、投票或信号灯时，学生端从内容页切换到互动页；互动结束后返回教师当前教学状态。</p>
+<h4 id="892-技术边界">8.9.2 技术边界<a class="heading-anchor" href="#892-技术边界" aria-label="链接到本节">#</a></h4><p>已确认现有教学作品生成服务可提供：</p>
+<ul>
+<li>稳定的教学作品生成能力；</li>
+<li>可点击访问的托管 HTML 链接；</li>
+<li>不可变作品版本；</li>
+<li>内容摘要；</li>
+<li>学生端只读运行教学作品。</li>
+</ul>
+<p><strong>待确认（技术核验）</strong>：</p>
+<ul>
+<li>现有教学作品生成服务是否能暴露当前页、内部路由、动画时间点、控件参数、3D 状态和游戏状态；</li>
+<li>学生端能否以统一协议恢复这些状态；</li>
+<li>采用状态同步、操作事件同步、定时截图/画面流还是分形态适配；</li>
+<li>哪些作品及内部操作不支持同步，以及对应降级方案；</li>
+<li>端到端同步延迟、断线重连、并发人数和带宽目标；</li>
+<li>互动打断教学内容时，视频、动画和游戏应暂停还是继续；</li>
+<li>教师多标签页或多设备同时打开课堂时的主控权规则。</li>
+<li>托管 HTML 是否允许 iframe 嵌入，以及跨域、CSP、<code>X-Frame-Options</code>、事件 SDK 和学生端控件屏蔽是否可行。</li>
+</ul>
+<blockquote>
+<blockquote>说明：产品要求“学生只读看到教师操作效果”已经明确；待确认的是技术实现与可支持作品范围，不是是否需要该体验。</blockquote>
+</blockquote>
+<h3 id="89-发布正式题">8.9 发布正式题<a class="heading-anchor" href="#89-发布正式题" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>用户做什么</th>
+<th>系统做什么</th>
+<th>页面状态</th>
+<th>成功后去哪</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>教师打开“正式题”</td>
+<td>展示课堂冻结的全部配套题，并标出本堂已发布题目</td>
+<td>未发布/选择中</td>
+<td>留在 T13</td>
+</tr>
+<tr>
+<td>2</td>
+<td>教师单选、多选或全选 1–25 道未发布题目</td>
+<td>记录选择数量，已发布题目不可再次选择</td>
+<td>选择中/无可发布题</td>
+<td>留在 T13</td>
+</tr>
+<tr>
+<td>3</td>
+<td>点击“发布 N 道题”</td>
+<td>建立一个题组收集轮次，一次将全部所选题目推送到学生端</td>
+<td>发布中/收集中/失败</td>
+<td>学生进入 S04</td>
+</tr>
+<tr>
+<td>4</td>
+<td>学生按自己的速度切换题目并选择答案</td>
+<td>每道题选答后自动保存；不同学生可停留在不同题目</td>
+<td>未作答/已保存/保存失败</td>
+<td>留在 S04</td>
+</tr>
+<tr>
+<td>5</td>
+<td>学生完成全部题目</td>
+<td>标记“已完成题组”；截止前仍可返回逐题检查和修改</td>
+<td>已完成/检查中</td>
+<td>留在 S04</td>
+</tr>
+<tr>
+<td>6</td>
+<td>迟到学生在收集期间加入</td>
+<td>同步当前题组并允许从第 1 题开始自主作答</td>
+<td>加入中/收集中</td>
+<td>S04</td>
+</tr>
+<tr>
+<td>7</td>
+<td>教师结束收集</td>
+<td>拒绝新保存和修改，按题计算提交人数、未提交人数和正确率</td>
+<td>结束中/已结束</td>
+<td>教师结果区</td>
+</tr>
+<tr>
+<td>8</td>
+<td>教师公布结果</td>
+<td>向学生发布逐题个人结果、正确答案、解析与全班匿名分布</td>
+<td>公布中/已公布</td>
+<td>学生进入 S07</td>
+</tr>
+<tr>
+<td>9</td>
+<td>教师继续教学</td>
+<td>学生返回当前只读教学内容</td>
+<td>恢复中</td>
+<td>T13/S03</td>
+</tr>
+</tbody></table></div>
+<p>规则：</p>
+<ul>
+<li>教师可以在任意教学时点决定是否发布题目；PPT 页关联不构成发布限制；</li>
+<li>所有非 PPT 作品均可从整份作品的题目列表发布；</li>
+<li>“单题提问”不作为独立功能；选择 1 道题发布就是只含 1 题的正式题组；</li>
+<li>每次可发布 1–25 道题，受当前作品题目总量和“本堂未发布”条件限制，可单选、多选或全选；</li>
+<li>题组中的题目一次全部下发，但不统一锁定当前题；学生各自切题、各自推进；</li>
+<li>每题选答后自动保存；结束收集前可修改，以最后一次成功保存为准；</li>
+<li>同一时间只允许一个正式题组、投票或信号灯处于收集中；</li>
+<li>教师结束收集后不自动公布，由教师选择“公布结果”或直接继续教学；</li>
+<li>同一道正式题不允许在同一堂课堂重复发布；</li>
+<li>未提交单独展示，不计入正确率分母；0 人有效提交时正确率显示“—”；</li>
+<li>多选题只有完全匹配全部正确答案才算正确；</li>
+<li>教师公布后，学生逐题看到个人答案、正确答案、解析与全班匿名分布；</li>
+<li>课堂进行中不允许编辑题目快照；</li>
+<li>迟到学生允许加入，若题组仍在收集，可参与当前题组；</li>
+<li>教师误发后能否取消及取消轮次是否进入报告：<strong>待确认</strong>；</li>
+<li>教师结束收集时，已保存部分题目但未点击“完成”的学生按每题实际保存结果统计，题组完成数仅用于进度展示。</li>
+</ul>
+<h3 id="810-发起投票">8.10 发起投票<a class="heading-anchor" href="#810-发起投票" aria-label="链接到本节">#</a></h3><p>投票是课堂工具，不属于有标准答案的正式题。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>用户做什么</th>
+<th>系统做什么</th>
+<th>页面状态</th>
+<th>成功后去哪</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>教师现场输入投票问题并填写 2–4 个选项</td>
+<td>校验问题和选项</td>
+<td>编辑中/可发布/校验失败</td>
+<td>留在 T13</td>
+</tr>
+<tr>
+<td>2</td>
+<td>点击发布</td>
+<td>创建投票轮次并推送到学生端</td>
+<td>收集中</td>
+<td>S05</td>
+</tr>
+<tr>
+<td>3</td>
+<td>学生按待确认的单选/多选规则选择并提交</td>
+<td>记录匿名选择并更新整体分布</td>
+<td>提交中/已提交</td>
+<td>留在 S05</td>
+</tr>
+<tr>
+<td>4</td>
+<td>教师结束收集</td>
+<td>冻结统计；是否向学生公布整体分布待确认</td>
+<td>已结束/已公布（如启用）</td>
+<td>S07 或 S03</td>
+</tr>
+</tbody></table></div>
+<p>已确认投票采用教师现场输入，支持 2–4 个选项。<strong>待确认</strong>：投票是否固定单选、学生能否在结束前修改、是否允许不公布结果、是否进入报告及报告字段。</p>
+<h3 id="811-发起信号灯">8.11 发起信号灯<a class="heading-anchor" href="#811-发起信号灯" aria-label="链接到本节">#</a></h3><p>信号灯是课堂即时反馈工具，不是正式答题，不计算正确率。教师发起后，学生选择一个反馈状态。教师何时查看整体分布待确认。</p>
+<p><strong>待确认</strong>：</p>
+<ul>
+<li>信号灯的档位数量、名称及文案（例如“理解 / 不确定 / 需要帮助”）；</li>
+<li>学生能否在结束前反复修改；</li>
+<li>是否由教师手动结束；</li>
+<li>是否向学生公布整体分布；</li>
+<li>是否进入课堂报告及如何解释。</li>
+</ul>
+<h3 id="812-结束课堂">8.12 结束课堂<a class="heading-anchor" href="#812-结束课堂" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>用户做什么</th>
+<th>系统做什么</th>
+<th>页面状态</th>
+<th>成功后去哪</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>教师点击“结束课堂”</td>
+<td>校验是否有正在收集的互动</td>
+<td>结束确认/冲突提示</td>
+<td>留在 T13</td>
+</tr>
+<tr>
+<td>2</td>
+<td>确认结束</td>
+<td>关闭扫码入口和新提交，冻结课堂事件及匿名汇总</td>
+<td>正在结束/失败</td>
+<td>T14 报告生成页</td>
+</tr>
+<tr>
+<td>3</td>
+<td>按待确认的自动/手动方式触发报告</td>
+<td>创建基础整体统计；是否进一步生成 AI 文字复盘待确认</td>
+<td>等待生成/统计中/成功/失败；如启用 AI 则可部分完成</td>
+<td>T15 报告详情</td>
+</tr>
+<tr>
+<td>4</td>
+<td>学生收到结束事件</td>
+<td>关闭互动与内容同步</td>
+<td>课堂已结束</td>
+<td>S08</td>
+</tr>
+</tbody></table></div>
+<p><strong>待确认</strong>：若结束课堂时仍有互动正在收集，是自动结束并计入、自动取消，还是要求教师先选择；报告由系统自动开始生成还是教师点击触发；教师断线未主动结束时的自动结束/过期策略；课堂最长时长；误结束后能否撤销（建议不可撤销，只能新建课堂）。</p>
+<h3 id="813-查看课堂报告">8.13 查看课堂报告<a class="heading-anchor" href="#813-查看课堂报告" aria-label="链接到本节">#</a></h3><p>报告用于教师个人复盘，默认只展示整堂课堂的整体汇总，不展示或持续识别学生个人。</p>
+<p>建议报告结构如下，未明确确认的具体字段已标注：</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>模块</th>
+<th>内容</th>
+<th>确认状态</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>课堂基础信息</td>
+<td>日期、教学作品、学科、教学语言</td>
+<td>已确认范围内可保存</td>
+</tr>
+<tr>
+<td>参与概览</td>
+<td>匿名参与人数、课堂时长</td>
+<td>待确认具体口径</td>
+</tr>
+<tr>
+<td>正式题汇总</td>
+<td>每道已发布题的有效提交数、未提交数、选项分布、正确率</td>
+<td>已确认；未提交不计入正确率分母，0 有效提交显示“—”</td>
+</tr>
+<tr>
+<td>投票汇总</td>
+<td>问题与选项分布</td>
+<td>待确认是否进入报告</td>
+</tr>
+<tr>
+<td>信号灯汇总</td>
+<td>每轮各状态分布</td>
+<td>待确认是否进入报告</td>
+</tr>
+<tr>
+<td>AI 文字复盘</td>
+<td>整体表现、可能需巩固内容、教学建议</td>
+<td>待确认是否需要，以及字段与提示词</td>
+</tr>
+<tr>
+<td>教师观察</td>
+<td>教师手工补充课堂观察</td>
+<td>待确认是否需要</td>
+</tr>
+<tr>
+<td>下一次备课</td>
+<td>选择反馈并发起新备课</td>
+<td>已确认</td>
+</tr>
+</tbody></table></div>
+<p>报告不得展示：</p>
+<ul>
+<li>学生姓名、学号、账号；</li>
+<li>临时编号列表；</li>
+<li>某个临时编号的逐题轨迹；</li>
+<li>跨课堂个人表现；</li>
+<li>仅依据投票或信号灯得出的确定性知识掌握结论。</li>
+</ul>
+<p><strong>待确认</strong>：0 名学生、未发布正式题、所有题 0 人提交、只有课堂工具或开课后立即结束时，是否仍生成基础报告；报告是否允许删除；报告和课堂历史保留期限。</p>
+<h3 id="814-报告进入下一次备课">8.14 报告进入下一次备课<a class="heading-anchor" href="#814-报告进入下一次备课" aria-label="链接到本节">#</a></h3><p>该流程采用教师主动发起的“弱连续”模式，不建立班级，也不识别下一次是否为同一批学生。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>用户做什么</th>
+<th>系统做什么</th>
+<th>页面状态</th>
+<th>成功后去哪</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>在报告页点击“基于本次课堂继续备课”</td>
+<td>读取本次报告和来源作品摘要</td>
+<td>加载中/可选择/失败</td>
+<td>报告反馈选择状态</td>
+</tr>
+<tr>
+<td>2</td>
+<td>勾选要带入的反馈</td>
+<td>组织为下一次备课上下文</td>
+<td>未选择/已选择</td>
+<td>留在 T15</td>
+</tr>
+<tr>
+<td>3</td>
+<td>点击“进入下一次备课”</td>
+<td>带入来源报告关系、原学科/语言及所选反馈</td>
+<td>创建中</td>
+<td>T04</td>
+</tr>
+<tr>
+<td>4</td>
+<td>填写本次新的教学要求，按需上传新教案</td>
+<td>把新要求和所选课堂反馈共同提交给现有教学作品生成服务</td>
+<td>编辑中/可生成</td>
+<td>T05</td>
+</tr>
+<tr>
+<td>5</td>
+<td>等待生成</td>
+<td>生成全新的未保存作品结果与配套题；教师在 T06 另行选择保存</td>
+<td>生成中/未保存/失败</td>
+<td>T06</td>
+</tr>
+</tbody></table></div>
+<p>教师可选择带入的内容建议包括：正式题整体结果、投票/信号灯整体反馈，以及薄弱知识点、AI 教学建议或教师观察（若后续确认生成/保留）。</p>
+<p><strong>待确认</strong>：</p>
+<ul>
+<li>系统默认带入和教师可选择带入的精确字段；</li>
+<li>一次可引用一份还是多份报告；</li>
+<li>同一报告是否能多次发起新备课；</li>
+<li>未勾选反馈时是否允许仅沿用原内容继续；</li>
+<li>下一次备课是否默认沿用原学科和教学语言，以及是否允许修改。</li>
+<li>仅选择报告反馈是否已经构成有效生成输入，还是仍必须填写新的教学要求或上传教案；该规则需与 T04 的表单校验保持一致。</li>
+</ul>
+<hr>
+<h2 id="9-功能需求明细">9. 功能需求明细<a class="heading-anchor" href="#9-功能需求明细" aria-label="链接到本节">#</a></h2><h3 id="91-账号与权益">9.1 账号与权益<a class="heading-anchor" href="#91-账号与权益" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>需求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-A01</td>
+<td>系统必须支持教师个人账号登录。登录方式待确认。</td>
+</tr>
+<tr>
+<td>FR-A02</td>
+<td>未获得使用权益的教师必须可输入学校发放的激活码。</td>
+</tr>
+<tr>
+<td>FR-A03</td>
+<td>系统必须以服务端最终状态判断权益，刷新或重新登录后不可仅依赖前端状态。</td>
+</tr>
+<tr>
+<td>FR-A04</td>
+<td>教师账号必须关联个人作品、收藏、课堂历史和报告。</td>
+</tr>
+<tr>
+<td>FR-A05</td>
+<td>产品内不提供学校管理端。</td>
+</tr>
+<tr>
+<td>FR-A06</td>
+<td>学生不得创建账号或被要求激活。</td>
+</tr>
+</tbody></table></div>
+<h3 id="92-备课与生成">9.2 备课与生成<a class="heading-anchor" href="#92-备课与生成" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>需求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-P01</td>
+<td>新建备课时，学科和教学语言均为可选；未选择不得阻止生成。</td>
+</tr>
+<tr>
+<td>FR-P02</td>
+<td>教学语言的可选值只提供繁体中文和英文，并允许“不指定”状态。</td>
+</tr>
+<tr>
+<td>FR-P03</td>
+<td>产品不要求填写年级。</td>
+</tr>
+<tr>
+<td>FR-P04</td>
+<td>教师可输入教学要求，也可上传教案；两者可以同时提供。</td>
+</tr>
+<tr>
+<td>FR-P05</td>
+<td>系统调用现有教学作品生成服务，不把教学作品限定为 PPT。</td>
+</tr>
+<tr>
+<td>FR-P06</td>
+<td>成功生成结果必须取得不可变版本 ID、托管访问链接和内容摘要。</td>
+</tr>
+<tr>
+<td>FR-P07</td>
+<td>只有教师在 T06 明确保存成功的作品才进入个人作品库；未保存生成结果不得出现于 T09。</td>
+</tr>
+<tr>
+<td>FR-P08</td>
+<td>内容生成成功后，系统自动触发配套题生成。</td>
+</tr>
+<tr>
+<td>FR-P09</td>
+<td>内容成功、题目失败时不得丢失内容；应保留为未保存生成结果且不得自动入库。是否允许保存无题作品待确认。</td>
+</tr>
+<tr>
+<td>FR-P10</td>
+<td>教师可修改个人教学作品；现有服务的编辑入口、保存新版本和更新摘要方式待确认。</td>
+</tr>
+<tr>
+<td>FR-P11</td>
+<td>教师首页首屏必须默认展示对话式备课输入区，并可直接提交生成任务。</td>
+</tr>
+<tr>
+<td>FR-P12</td>
+<td>首页对话输入区的“上传教案”入口必须位于左下角；学科和教学语言以可选设置显示在底部操作区。</td>
+</tr>
+</tbody></table></div>
+<h3 id="93-资源广场与个人资产">9.3 资源广场与个人资产<a class="heading-anchor" href="#93-资源广场与个人资产" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>需求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-R01</td>
+<td>资源广场只展示平台提供的资源。</td>
+</tr>
+<tr>
+<td>FR-R02</td>
+<td>平台资源不包含正式配套题。</td>
+</tr>
+<tr>
+<td>FR-R03</td>
+<td>教师可收藏平台资源。</td>
+</tr>
+<tr>
+<td>FR-R04</td>
+<td>教师可将平台资源建立为可修改草稿，并在 T06 明确保存为个人版本。</td>
+</tr>
+<tr>
+<td>FR-R05</td>
+<td>个人版本与平台原资源隔离，教师修改不得回写原资源。</td>
+</tr>
+<tr>
+<td>FR-R06</td>
+<td>资源草稿建立后自动生成配套题；教师明确保存时，草稿与配套题一并进入个人作品库。</td>
+</tr>
+<tr>
+<td>FR-R07</td>
+<td>教师个人作品库和课堂历史必须长期关联个人账号；具体保留期待确认。</td>
+</tr>
+<tr>
+<td>FR-R08</td>
+<td>资源广场必须提供教师查看个人收藏记录的入口。取消收藏规则待确认。</td>
+</tr>
+</tbody></table></div>
+<h3 id="94-配套题">9.4 配套题<a class="heading-anchor" href="#94-配套题" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>需求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-Q01</td>
+<td>配套题由 AI 基于教学作品内容自动生成。</td>
+</tr>
+<tr>
+<td>FR-Q02</td>
+<td>只支持单选、多选、判断题，不支持简答题。</td>
+</tr>
+<tr>
+<td>FR-Q03</td>
+<td>教师无需先确认 AI 题目即可在课堂发布。</td>
+</tr>
+<tr>
+<td>FR-Q04</td>
+<td>教师可修改、删除、手动新增和重新生成题目。</td>
+</tr>
+<tr>
+<td>FR-Q05</td>
+<td>页面不得标注题目来源。</td>
+</tr>
+<tr>
+<td>FR-Q06</td>
+<td>仅 PPT 可选择关联具体页；所有非 PPT 作品均只关联整份作品。</td>
+</tr>
+<tr>
+<td>FR-Q07</td>
+<td>页面关联不限制题目发布时机。</td>
+</tr>
+<tr>
+<td>FR-Q08</td>
+<td>教学作品内部自带练习不得自动作为正式题收集数据。</td>
+</tr>
+<tr>
+<td>FR-Q09</td>
+<td>教师修改内容后，系统不自动更新配套题。</td>
+</tr>
+<tr>
+<td>FR-Q10</td>
+<td>新作品默认自动生成 6 道配套题，每个作品最多保存 25 道。</td>
+</tr>
+<tr>
+<td>FR-Q11</td>
+<td>教师可覆盖重新生成 6 道题，也可在不超过上限时每次追加生成 6 道题。</td>
+</tr>
+<tr>
+<td>FR-Q12</td>
+<td>多选题采用正确答案完全匹配判分，不计算部分分。</td>
+</tr>
+<tr>
+<td>FR-Q13</td>
+<td>课堂进行中不得编辑该课堂冻结的题目快照。</td>
+</tr>
+</tbody></table></div>
+<h3 id="95-课堂与学生">9.5 课堂与学生<a class="heading-anchor" href="#95-课堂与学生" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>需求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-C01</td>
+<td>教师可从个人教学作品创建课堂。</td>
+</tr>
+<tr>
+<td>FR-C02</td>
+<td>每堂课堂必须在正式开始前冻结作品不可变版本与配套题快照；在创建还是开始时冻结待确认。</td>
+</tr>
+<tr>
+<td>FR-C03</td>
+<td>每堂课堂生成独立二维码和 Session。</td>
+</tr>
+<tr>
+<td>FR-C04</td>
+<td>学生用平板扫码加入，无需账号或个人信息。</td>
+</tr>
+<tr>
+<td>FR-C05</td>
+<td>系统只生成本堂有效的匿名临时编号。</td>
+</tr>
+<tr>
+<td>FR-C06</td>
+<td>学生端必须只读显示教师正在播放和操作的教学内容。</td>
+</tr>
+<tr>
+<td>FR-C07</td>
+<td>学生不能操作、翻页或改变教学作品状态。</td>
+</tr>
+<tr>
+<td>FR-C08</td>
+<td>课堂结束后二维码失效，学生端进入结束状态。</td>
+</tr>
+<tr>
+<td>FR-C09</td>
+<td>课堂进行中允许迟到学生扫码加入，并同步当前教学或互动状态。</td>
+</tr>
+</tbody></table></div>
+<h3 id="96-课堂互动">9.6 课堂互动<a class="heading-anchor" href="#96-课堂互动" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>需求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-I01</td>
+<td>教师可在课堂任意时点发布配套正式题。</td>
+</tr>
+<tr>
+<td>FR-I02</td>
+<td>正式题支持单选、多选和判断。</td>
+</tr>
+<tr>
+<td>FR-I03</td>
+<td>学生在教师结束收集前可修改答案，以最后一次成功提交为准。</td>
+</tr>
+<tr>
+<td>FR-I04</td>
+<td>教师公布结果后，学生可看到个人结果和全班分布。</td>
+</tr>
+<tr>
+<td>FR-I05</td>
+<td>教师可现场创建 2–4 个选项的投票。</td>
+</tr>
+<tr>
+<td>FR-I06</td>
+<td>教师可发起信号灯反馈。</td>
+</tr>
+<tr>
+<td>FR-I07</td>
+<td>正式题、投票和信号灯必须形成相互独立的数据类型，不得把投票或信号灯计算为题目正确率。</td>
+</tr>
+<tr>
+<td>FR-I08</td>
+<td>教师可对本堂未发布题目进行单选、多选或全选，每次将 1–25 道题作为一个题组一次发布。</td>
+</tr>
+<tr>
+<td>FR-I09</td>
+<td>学生收到题组后可独立切换题目和推进，不与教师或其他学生同步固定在某一道题。</td>
+</tr>
+<tr>
+<td>FR-I10</td>
+<td>正式题答案按题自动保存，结束收集前允许修改；已保存的最后版本为有效答案。</td>
+</tr>
+<tr>
+<td>FR-I11</td>
+<td>同一道题不得在同一堂课堂重复发布，已发布题目在选择器中不可选。</td>
+</tr>
+<tr>
+<td>FR-I12</td>
+<td>同一时间只允许一个正式题组、投票或信号灯收集；教师结束收集后自主决定是否公布。</td>
+</tr>
+<tr>
+<td>FR-I13</td>
+<td>未提交单独统计且不计入正确率分母；0 有效提交时正确率显示“—”。</td>
+</tr>
+</tbody></table></div>
+<h3 id="97-报告与继续备课">9.7 报告与继续备课<a class="heading-anchor" href="#97-报告与继续备课" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>需求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-B01</td>
+<td>教师结束课堂后必须可以生成本堂课堂报告；自动或手动触发待确认。</td>
+</tr>
+<tr>
+<td>FR-B02</td>
+<td>报告面向教师个人复盘。</td>
+</tr>
+<tr>
+<td>FR-B03</td>
+<td>报告只展示课堂整体汇总，不展示临时编号或个人轨迹。</td>
+</tr>
+<tr>
+<td>FR-B04</td>
+<td>教师个人课堂历史必须保留课堂及报告入口。</td>
+</tr>
+<tr>
+<td>FR-B05</td>
+<td>报告页必须提供“基于本次课堂继续备课”的入口。</td>
+</tr>
+<tr>
+<td>FR-B06</td>
+<td>教师主动选择的报告反馈必须作为下一次备课上下文；是否还必须提供新的教学要求或教案待确认。</td>
+</tr>
+<tr>
+<td>FR-B07</td>
+<td>报告续备生成结果必须先保持未保存；教师保存新作品时，必须与来源作品和报告独立保存。</td>
+</tr>
+<tr>
+<td>FR-B08</td>
+<td>报告闭环不得依赖班级、学生账号或跨课堂个人识别。</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="10-页面状态设计">10. 页面状态设计<a class="heading-anchor" href="#10-页面状态设计" aria-label="链接到本节">#</a></h2><h3 id="101-通用状态原则">10.1 通用状态原则<a class="heading-anchor" href="#101-通用状态原则" aria-label="链接到本节">#</a></h3><p>每个关键页面必须区分以下状态，不能把请求失败伪装成“暂无内容”：</p>
+<ol>
+<li>初始/未操作；</li>
+<li>加载中；</li>
+<li>有数据成功态；</li>
+<li>无数据空状态；</li>
+<li>可恢复错误；</li>
+<li>不可继续错误；</li>
+<li>权限不足或权益无效；</li>
+<li>网络断开与恢复中；</li>
+<li>保存中、已保存、保存失败；</li>
+<li>后台任务中的离开与恢复。</li>
+</ol>
+<h3 id="102-教师端页面状态矩阵">10.2 教师端页面状态矩阵<a class="heading-anchor" href="#102-教师端页面状态矩阵" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>页面</th>
+<th>状态</th>
+<th>页面表现</th>
+<th>可执行操作</th>
+<th>成功去向</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>T01 账号进入</td>
+<td>初始</td>
+<td>账号凭证输入区；账号获取方式待确认</td>
+<td>提交</td>
+<td>激活或首页</td>
+</tr>
+<tr>
+<td>T01 账号进入</td>
+<td>提交中</td>
+<td>禁止重复提交</td>
+<td>等待/取消待确认</td>
+<td>成功或错误</td>
+</tr>
+<tr>
+<td>T01 账号进入</td>
+<td>失败</td>
+<td>展示可理解错误</td>
+<td>修改后重试</td>
+<td>留在本页</td>
+</tr>
+<tr>
+<td>T02 激活</td>
+<td>待输入</td>
+<td>激活码输入区</td>
+<td>提交</td>
+<td>校验中</td>
+</tr>
+<tr>
+<td>T02 激活</td>
+<td>激活失败</td>
+<td>区分无效、过期、已使用等；文案待确认</td>
+<td>重试/求助</td>
+<td>留在本页</td>
+</tr>
+<tr>
+<td>T02 激活</td>
+<td>成功</td>
+<td>显示权益生效</td>
+<td>开始使用</td>
+<td>T03</td>
+</tr>
+<tr>
+<td>T03 首页</td>
+<td>首次使用</td>
+<td>首屏展示空白对话式备课输入区；上传教案位于左下角；学科和语言标记为可选</td>
+<td>输入/上传/按需选择/浏览资源</td>
+<td>T05/T07</td>
+</tr>
+<tr>
+<td>T03 首页</td>
+<td>编辑中</td>
+<td>保留教师已输入要求、已上传教案和可选设置</td>
+<td>修改/提交</td>
+<td>T05</td>
+</tr>
+<tr>
+<td>T03 首页</td>
+<td>校验失败</td>
+<td>教学要求与教案均为空时在对话区就地提示，不要求补选学科或语言</td>
+<td>修改/上传</td>
+<td>留在本页</td>
+</tr>
+<tr>
+<td>T03 首页</td>
+<td>回访</td>
+<td>对话式备课输入区保持主操作，同时展示最近作品、任务、课堂报告</td>
+<td>新建/继续</td>
+<td>T05 或对应页面</td>
+</tr>
+<tr>
+<td>T03 首页</td>
+<td>加载失败</td>
+<td>显示重试，不显示空列表</td>
+<td>重试</td>
+<td>留在本页</td>
+</tr>
+<tr>
+<td>T04 备课</td>
+<td>初始/编辑中</td>
+<td>表单与上传区</td>
+<td>填写/上传</td>
+<td>留在本页</td>
+</tr>
+<tr>
+<td>T04 备课</td>
+<td>上传/解析中</td>
+<td>文件进度、不可重复提交</td>
+<td>等待/取消待确认</td>
+<td>文件就绪</td>
+</tr>
+<tr>
+<td>T04 备课</td>
+<td>校验失败</td>
+<td>定位到缺失或非法字段</td>
+<td>修改</td>
+<td>留在本页</td>
+</tr>
+<tr>
+<td>T05 生成</td>
+<td>排队/生成中</td>
+<td>显示真实任务状态</td>
+<td>是否可离开并后台继续待确认</td>
+<td>T06</td>
+</tr>
+<tr>
+<td>T05 生成</td>
+<td>内容成功、题目生成中</td>
+<td>作品可预览程度待确认</td>
+<td>等待</td>
+<td>T06</td>
+</tr>
+<tr>
+<td>T05 生成</td>
+<td>内容成功、题目失败</td>
+<td>保留未保存生成结果，提供题目重试</td>
+<td>重试/进入作品</td>
+<td>T06</td>
+</tr>
+<tr>
+<td>T05 生成</td>
+<td>内容失败</td>
+<td>明确失败阶段</td>
+<td>重试</td>
+<td>T04/T05</td>
+</tr>
+<tr>
+<td>T06 作品</td>
+<td>新生成/未保存</td>
+<td>明确“未保存”，内容可预览，元数据与配套题可编辑；不显示于 T09</td>
+<td>编辑/保存；禁止开课</td>
+<td>T06</td>
+</tr>
+<tr>
+<td>T06 作品</td>
+<td>已保存/可编辑</td>
+<td>内容预览、元数据、配套题和主操作</td>
+<td>编辑/保存/开课</td>
+<td>T06/T12</td>
+</tr>
+<tr>
+<td>T06 作品</td>
+<td>有未保存修改</td>
+<td>明确提示当前修改尚未进入可用版本</td>
+<td>保存/放弃待确认</td>
+<td>留在本页</td>
+</tr>
+<tr>
+<td>T06 作品</td>
+<td>内容新版本生成中</td>
+<td>显示现有服务的编辑/重生成状态；能力待技术核验</td>
+<td>等待</td>
+<td>新可用版本</td>
+</tr>
+<tr>
+<td>T06 作品</td>
+<td>保存中</td>
+<td>显示未完成状态，阻止误报成功</td>
+<td>等待</td>
+<td>已保存</td>
+</tr>
+<tr>
+<td>T06 作品</td>
+<td>保存失败</td>
+<td>明确“尚未保存”</td>
+<td>重试</td>
+<td>留在本页</td>
+</tr>
+<tr>
+<td>T06 作品</td>
+<td>配套题单独保存失败</td>
+<td>保留最后成功题目版本，标出未保存修改</td>
+<td>重试</td>
+<td>留在本页</td>
+</tr>
+<tr>
+<td>T06 作品</td>
+<td>内容链接失效</td>
+<td>无法预览，显示修复/重试入口</td>
+<td>重试/联系客服待确认</td>
+<td>留在本页</td>
+</tr>
+<tr>
+<td>T07 资源广场</td>
+<td>加载中/列表/无结果</td>
+<td>区分无资源与搜索无结果</td>
+<td>浏览/重试</td>
+<td>T08</td>
+</tr>
+<tr>
+<td>T07 我的收藏</td>
+<td>加载中/列表/空/失败</td>
+<td>展示教师已收藏的平台资源</td>
+<td>打开/重试</td>
+<td>T08</td>
+</tr>
+<tr>
+<td>T08 资源详情</td>
+<td>可预览</td>
+<td>收藏、使用并修改</td>
+<td>执行操作</td>
+<td>T08/T06</td>
+</tr>
+<tr>
+<td>T08 资源详情</td>
+<td>已下架/复制失败</td>
+<td>禁止继续复制并提示</td>
+<td>返回列表</td>
+<td>T07</td>
+</tr>
+<tr>
+<td>T09 作品库</td>
+<td>空/列表/失败</td>
+<td>新用户引导或作品卡状态</td>
+<td>新建/打开/重试</td>
+<td>T04/T06</td>
+</tr>
+<tr>
+<td>T12 候课室</td>
+<td>候课中</td>
+<td>二维码、加入人数、开始按钮</td>
+<td>开始/取消待确认</td>
+<td>T13</td>
+</tr>
+<tr>
+<td>T12 候课室</td>
+<td>二维码失效</td>
+<td>禁止新加入</td>
+<td>刷新二维码待确认</td>
+<td>留在本页</td>
+</tr>
+<tr>
+<td>T12 候课室</td>
+<td>创建失败</td>
+<td>显示作品或权益原因</td>
+<td>重试/返回作品</td>
+<td>T06</td>
+</tr>
+<tr>
+<td>T13 授课</td>
+<td>内容加载中</td>
+<td>保留课堂控制框架</td>
+<td>重试</td>
+<td>正常授课</td>
+</tr>
+<tr>
+<td>T13 授课</td>
+<td>正常</td>
+<td>教师控制内容，学生只读跟随</td>
+<td>操作/互动/结束</td>
+<td>留在本页</td>
+</tr>
+<tr>
+<td>T13 授课</td>
+<td>正式题选择中</td>
+<td>展示未发布题目、全选/多选、已选数量；本堂已发布题不可选</td>
+<td>预览/选择/发布</td>
+<td>发布中</td>
+</tr>
+<tr>
+<td>T13 授课</td>
+<td>互动发布中</td>
+<td>锁定发布按钮并保证同一请求只建立一个轮次</td>
+<td>等待</td>
+<td>收集中/失败</td>
+</tr>
+<tr>
+<td>T13 授课</td>
+<td>正式题组收集中</td>
+<td>展示完成题组人数、逐题已保存人数和结束入口</td>
+<td>结束收集</td>
+<td>已结束未公布</td>
+</tr>
+<tr>
+<td>T13 授课</td>
+<td>已结束未公布</td>
+<td>展示逐题提交、未提交、正确率与整体结果</td>
+<td>公布/继续教学</td>
+<td>已公布/正常授课</td>
+</tr>
+<tr>
+<td>T13 授课</td>
+<td>结果已公布</td>
+<td>显示学生端已公布状态</td>
+<td>继续教学</td>
+<td>正常授课</td>
+</tr>
+<tr>
+<td>T13 授课</td>
+<td>同步异常</td>
+<td>显示受影响状态，不伪造同步成功</td>
+<td>重试/降级待确认</td>
+<td>留在本页</td>
+</tr>
+<tr>
+<td>T13 授课</td>
+<td>教师断线</td>
+<td>尝试恢复 Session</td>
+<td>重连</td>
+<td>当前课堂</td>
+</tr>
+<tr>
+<td>T14 报告生成</td>
+<td>基础统计中</td>
+<td>显示真实阶段；是否可离开并后台继续待确认</td>
+<td>等待/离开待确认</td>
+<td>T15</td>
+</tr>
+<tr>
+<td>T14 报告生成</td>
+<td>AI 文字复盘中（如启用）</td>
+<td>是否启用 AI 复盘待确认</td>
+<td>等待</td>
+<td>T15</td>
+</tr>
+<tr>
+<td>T14 报告生成</td>
+<td>部分完成（如启用 AI）</td>
+<td>展示可用基础统计</td>
+<td>是否允许重试 AI 待确认</td>
+<td>T15</td>
+</tr>
+<tr>
+<td>T14 报告生成</td>
+<td>失败</td>
+<td>显示失败阶段</td>
+<td>重试</td>
+<td>T14/T15</td>
+</tr>
+<tr>
+<td>T15 报告</td>
+<td>完成</td>
+<td>整体报告及继续备课入口</td>
+<td>选择反馈/继续备课</td>
+<td>T04</td>
+</tr>
+<tr>
+<td>T15 报告</td>
+<td>反馈选择中</td>
+<td>展示可带入项</td>
+<td>选择/取消</td>
+<td>留在本页</td>
+</tr>
+<tr>
+<td>T15 报告</td>
+<td>未选择反馈</td>
+<td>是否允许继续待确认</td>
+<td>补选/仅基于原内容待确认</td>
+<td>T04 或留在本页</td>
+</tr>
+<tr>
+<td>T15 报告</td>
+<td>创建下一次备课中/失败</td>
+<td>显示来源报告仍保留</td>
+<td>等待/重试</td>
+<td>T04</td>
+</tr>
+<tr>
+<td>T15 报告</td>
+<td>无数据</td>
+<td>具体是否生成及文案待确认</td>
+<td>返回历史</td>
+<td>T16</td>
+</tr>
+<tr>
+<td>T16 历史</td>
+<td>空/列表/报告生成中/失败</td>
+<td>显示每堂课堂与报告状态</td>
+<td>打开/重试</td>
+<td>T15</td>
+</tr>
+</tbody></table></div>
+<h3 id="103-学生端页面状态矩阵">10.3 学生端页面状态矩阵<a class="heading-anchor" href="#103-学生端页面状态矩阵" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>页面/场景</th>
+<th>状态</th>
+<th>页面表现</th>
+<th>学生操作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S01 扫码校验</td>
+<td>校验中</td>
+<td>明确正在进入课堂</td>
+<td>等待</td>
+</tr>
+<tr>
+<td>S01 扫码校验</td>
+<td>无效/过期/已结束</td>
+<td>显示无法加入原因，不展示教师信息</td>
+<td>重新扫码</td>
+</tr>
+<tr>
+<td>S02 候课</td>
+<td>已加入</td>
+<td>显示当堂临时编号和等待提示</td>
+<td>等待</td>
+</tr>
+<tr>
+<td>S03 教学内容</td>
+<td>加载中</td>
+<td>显示正在加载/同步</td>
+<td>重试</td>
+</tr>
+<tr>
+<td>S03 教学内容</td>
+<td>只读跟随</td>
+<td>展示教师当前内容，隐藏或禁用内部操作</td>
+<td>无内容操作</td>
+</tr>
+<tr>
+<td>S03 教学内容</td>
+<td>暂时断线</td>
+<td>保留最后画面并提示恢复</td>
+<td>重连</td>
+</tr>
+<tr>
+<td>S03 教学内容</td>
+<td>内容加载失败</td>
+<td>具体降级待确认</td>
+<td>刷新/重试</td>
+</tr>
+<tr>
+<td>S04 正式题组</td>
+<td>初始</td>
+<td>展示题目目录、当前题和题组总数</td>
+<td>自主切题/选择答案</td>
+</tr>
+<tr>
+<td>S04 正式题组</td>
+<td>单题保存中</td>
+<td>保留当前选择并防止重复请求</td>
+<td>等待/重试</td>
+</tr>
+<tr>
+<td>S04 正式题组</td>
+<td>部分作答</td>
+<td>标出已作答题号和整体进度，不强制所有学生处于同一题</td>
+<td>继续/返回修改</td>
+</tr>
+<tr>
+<td>S04 正式题组</td>
+<td>全部作答</td>
+<td>可点击完成；完成后仍可在收集截止前返回检查</td>
+<td>完成/检查修改</td>
+</tr>
+<tr>
+<td>S04 正式题组</td>
+<td>已结束</td>
+<td>禁止新选择和修改，保留逐题最后成功答案</td>
+<td>等待公布或返回内容</td>
+</tr>
+<tr>
+<td>S05 投票</td>
+<td>收集中</td>
+<td>展示问题和 2–4 个选项</td>
+<td>选择提交</td>
+</tr>
+<tr>
+<td>S06 信号灯</td>
+<td>收集中</td>
+<td>展示反馈档位</td>
+<td>选择提交</td>
+</tr>
+<tr>
+<td>S07 结果</td>
+<td>已公布</td>
+<td>展示个人结果和全班分布；详细字段待确认</td>
+<td>返回内容</td>
+</tr>
+<tr>
+<td>S08 课堂结束</td>
+<td>终态</td>
+<td>提示课堂已结束</td>
+<td>关闭页面</td>
+</tr>
+</tbody></table></div>
+<h3 id="104-学生端显示优先级">10.4 学生端显示优先级<a class="heading-anchor" href="#104-学生端显示优先级" aria-label="链接到本节">#</a></h3><p>以下优先级用于避免同步内容、互动和结束状态冲突：</p>
+<figure class="code-block"><figcaption>text</figcaption><pre><code>课堂已结束
+＞ 连接中断/恢复
+＞ 正在收集的正式题、投票或信号灯
+＞ 教师已公布的互动结果
+＞ 教学内容只读同步
+＞ 候课</code></pre></figure><p>该优先级作为建议状态模型，涉及“是否允许多个互动同时进行”和“结果是否覆盖内容”的部分仍为<strong>待确认</strong>。</p>
+<hr>
+<h2 id="11-状态机与冲突规则">11. 状态机与冲突规则<a class="heading-anchor" href="#11-状态机与冲突规则" aria-label="链接到本节">#</a></h2><h3 id="111-教学作品状态">11.1 教学作品状态<a class="heading-anchor" href="#111-教学作品状态" aria-label="链接到本节">#</a></h3><figure class="mermaid-block"><figcaption>教学作品状态</figcaption><div class="mermaid">stateDiagram-v2
+    [*] --&gt; Draft
+    Draft --&gt; Generating: 提交生成
+    Generating --&gt; ContentReady: 内容成功
+    Generating --&gt; ContentFailed: 内容失败
+    ContentReady --&gt; QuestionGenerating: 自动出题
+    QuestionGenerating --&gt; Generated: 题目成功，进入 T06（未保存）
+    QuestionGenerating --&gt; PartialGenerated: 题目失败，进入 T06（未保存）
+    PartialGenerated --&gt; QuestionGenerating: 重试题目
+    Generated --&gt; Saving: 教师选择保存
+    PartialGenerated --&gt; Saving: 教师选择保存（是否允许待确认）
+    Saving --&gt; Ready: 保存成功并进入个人作品库
+    Ready --&gt; Editing: 教师修改
+    Editing --&gt; Saving: 保存
+    Saving --&gt; SaveFailed: 保存失败
+    SaveFailed --&gt; Saving: 重试</div></figure><p><code>Generated</code> 与 <code>PartialGenerated</code> 均不得创建课堂；<code>PartialGenerated</code> 是否允许保存为无题个人作品：<strong>待确认</strong>。</p>
+<p>内容编辑与题目/元数据编辑必须是两个可区分的保存子状态：内容编辑可能由现有教学作品生成服务生成新的不可变版本和摘要；题目编辑仍归属个人作品，不随内容新版本自动迁移或重生成。内容编辑的具体接口为<strong>待确认（技术核验）</strong>。</p>
+<h3 id="112-课堂状态">11.2 课堂状态<a class="heading-anchor" href="#112-课堂状态" aria-label="链接到本节">#</a></h3><p>建议状态模型如下，超时与取消规则均待确认：</p>
+<figure class="mermaid-block"><figcaption>课堂状态</figcaption><div class="mermaid">stateDiagram-v2
+    [*] --&gt; Creating
+    Creating --&gt; Waiting: 创建成功
+    Creating --&gt; CreateFailed: 创建失败
+    Waiting --&gt; Live: 教师开始
+    Waiting --&gt; Cancelled: 教师取消（待确认）
+    Waiting --&gt; Expired: 超时（待确认）
+    Live --&gt; Ending: 教师结束
+    Ending --&gt; Ended: 冻结成功
+    Live --&gt; Reconnecting: 教师断线
+    Reconnecting --&gt; Live: 恢复
+    Reconnecting --&gt; Ended: 自动结束（待确认）</div></figure><h3 id="113-互动轮次状态">11.3 互动轮次状态<a class="heading-anchor" href="#113-互动轮次状态" aria-label="链接到本节">#</a></h3><p>以下为建议模型，发布并发、取消和公布规则尚未全部确认：</p>
+<figure class="mermaid-block"><figcaption>互动轮次状态</figcaption><div class="mermaid">stateDiagram-v2
+    [*] --&gt; Unpublished
+    Unpublished --&gt; Collecting: 教师发布
+    Collecting --&gt; Closed: 结束收集
+    Collecting --&gt; Cancelled: 取消（待确认）
+    Closed --&gt; Published: 公布结果
+    Closed --&gt; UnpublishedResult: 不公布（待确认）</div></figure><h3 id="114-报告状态">11.4 报告状态<a class="heading-anchor" href="#114-报告状态" aria-label="链接到本节">#</a></h3><p>基础整体报告为确定需求；是否生成 AI 文字复盘为<strong>待确认</strong>。若启用 AI，建议采用以下两阶段状态：</p>
+<figure class="mermaid-block"><figcaption>课堂报告状态</figcaption><div class="mermaid">stateDiagram-v2
+    [*] --&gt; Queued
+    Queued --&gt; Aggregating
+    Aggregating --&gt; Ready: 基础报告完成且未启用 AI
+    Aggregating --&gt; AIReview: 基础统计成功
+    Aggregating --&gt; Failed: 基础统计失败
+    AIReview --&gt; Ready: AI 复盘成功
+    AIReview --&gt; Partial: AI 复盘失败
+    Partial --&gt; AIReview: 重试
+    Failed --&gt; Aggregating: 在原始数据有效期内重试（待确认）</div></figure><h3 id="115-跨页面冲突">11.5 跨页面冲突<a class="heading-anchor" href="#115-跨页面冲突" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>冲突场景</th>
+<th>处理规则/状态</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>教师重复点击生成</td>
+<td>必须避免产生不可识别的重复任务；幂等方式待研发确认</td>
+</tr>
+<tr>
+<td>已有未保存生成结果时再次发起生成</td>
+<td>不得静默覆盖；提示教师返回编辑保存，或明确放弃旧草稿后继续</td>
+</tr>
+<tr>
+<td>题目基于版本 A 生成时，内容已保存为版本 B</td>
+<td>题目任务必须绑定明确版本；是否自动废弃 A 的结果待确认</td>
+</tr>
+<tr>
+<td>未保存生成结果点击开课</td>
+<td>阻止开课并提示教师先明确保存；只有已保存个人作品可创建课堂</td>
+</tr>
+<tr>
+<td>课堂快照冻结后再次编辑个人作品</td>
+<td>已冻结课堂继续使用原快照；冻结发生在创建还是开始时待确认</td>
+</tr>
+<tr>
+<td>平台资源复制成功但题目失败</td>
+<td>个人版本不得丢失；提供单独重试</td>
+</tr>
+<tr>
+<td>课堂中已有互动正在收集，又发布另一个互动</td>
+<td>是否阻止新互动待确认；建议同一时刻只保留一个收集态</td>
+</tr>
+<tr>
+<td>学生提交与教师结束收集同时发生</td>
+<td>以服务端确认的先后顺序为准；学生必须获得“已计入”或“未计入”明确结果</td>
+</tr>
+<tr>
+<td>教师结束课堂与学生扫码同时发生</td>
+<td>课堂结束优先，关闭后拒绝新加入</td>
+</tr>
+<tr>
+<td>教师多个页面同时控制课堂</td>
+<td>主控权、只读副本及接管机制待确认</td>
+</tr>
+<tr>
+<td>授权在生成或课堂进行中到期</td>
+<td>是否允许当前任务/课堂完成待确认</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="12-异常情况与边界处理">12. 异常情况与边界处理<a class="heading-anchor" href="#12-异常情况与边界处理" aria-label="链接到本节">#</a></h2><h3 id="121-登录激活与权益">12.1 登录、激活与权益<a class="heading-anchor" href="#121-登录激活与权益" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>异常</th>
+<th>系统处理</th>
+<th>用户可恢复动作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>登录凭证错误或过期</td>
+<td>明确提示，不创建错误账号</td>
+<td>重新输入/获取凭证</td>
+</tr>
+<tr>
+<td>激活码不存在</td>
+<td>不激活，不透露内部信息</td>
+<td>检查后重试</td>
+</tr>
+<tr>
+<td>激活码已使用、已过期或被停用</td>
+<td>区分状态的文案待确认</td>
+<td>联系发码学校/平台待确认</td>
+</tr>
+<tr>
+<td>激活提交超时但服务端已成功</td>
+<td>重新查询最终权益，不能重复消耗</td>
+<td>刷新/重新登录</td>
+</tr>
+<tr>
+<td>同一激活码并发提交</td>
+<td>需保证最多一次有效绑定；具体规则待确认</td>
+<td>展示最终状态</td>
+</tr>
+<tr>
+<td>权益到期</td>
+<td>资产是否保留，以及查看、编辑范围均待确认；建议不立即删除</td>
+<td>兑换新码/查看说明</td>
+</tr>
+</tbody></table></div>
+<h3 id="122-教案上传与生成">12.2 教案上传与生成<a class="heading-anchor" href="#122-教案上传与生成" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>异常</th>
+<th>系统处理</th>
+<th>用户可恢复动作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>学科或语言未选</td>
+<td>不阻止生成；按未指定状态提交，自动识别和兜底规则待确认</td>
+<td>可直接生成或按需补充</td>
+</tr>
+<tr>
+<td>提示词与教案均为空</td>
+<td>阻止生成</td>
+<td>提供至少一项</td>
+</tr>
+<tr>
+<td>文件格式不支持/过大/加密</td>
+<td>在上传或解析阶段明确报错</td>
+<td>更换文件</td>
+</tr>
+<tr>
+<td>文件上传中断</td>
+<td>保留其他表单内容</td>
+<td>重试上传</td>
+</tr>
+<tr>
+<td>扫描件无法识别</td>
+<td>提示未提取到有效内容</td>
+<td>更换文件或输入要求</td>
+</tr>
+<tr>
+<td>教学作品生成服务超时/失败</td>
+<td>标记具体任务失败，不创建伪成功作品</td>
+<td>重试/返回修改</td>
+</tr>
+<tr>
+<td>已返回作品但链接暂不可访问</td>
+<td>保持处理中或不可用，不提前允许开课</td>
+<td>后台重试</td>
+</tr>
+<tr>
+<td>内容成功、摘要失败</td>
+<td>保留内容，但不能自动出题</td>
+<td>重试摘要</td>
+</tr>
+<tr>
+<td>内容成功、题目失败</td>
+<td>保留未保存生成结果，不进入个人作品库</td>
+<td>单独重试题目</td>
+</tr>
+<tr>
+<td>教师关闭页面</td>
+<td>是否后台继续待确认；恢复时应展示真实最终状态</td>
+<td>从首页任务卡、T05 或 T06 恢复</td>
+</tr>
+</tbody></table></div>
+<h3 id="123-资源与个人作品">12.3 资源与个人作品<a class="heading-anchor" href="#123-资源与个人作品" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>异常</th>
+<th>系统处理</th>
+<th>用户可恢复动作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>资源加载失败</td>
+<td>显示错误而非空广场</td>
+<td>重试</td>
+</tr>
+<tr>
+<td>资源在复制时下架</td>
+<td>不创建不完整个人版本</td>
+<td>返回列表/重试其他资源</td>
+</tr>
+<tr>
+<td>复制成功、出题失败</td>
+<td>保留未保存资源草稿，不进入个人作品库</td>
+<td>重试出题</td>
+</tr>
+<tr>
+<td>个人作品保存失败</td>
+<td>明确“未保存”，不覆盖最后成功版本</td>
+<td>重试</td>
+</tr>
+<tr>
+<td>同一作品多标签编辑</td>
+<td>冲突检测和合并策略待确认</td>
+<td>刷新/另存副本待确认</td>
+</tr>
+<tr>
+<td>现有服务不支持对当前作品形态编辑</td>
+<td>不展示无法履行的编辑成功状态；首版修改边界待技术核验</td>
+<td>返回预览/重新生成待确认</td>
+</tr>
+<tr>
+<td>删除作品时存在课堂或报告</td>
+<td>不得级联误删课堂历史；具体阻止/确认规则待确认</td>
+<td>取消删除/确认范围</td>
+</tr>
+</tbody></table></div>
+<h3 id="124-创建加入与同步课堂">12.4 创建、加入与同步课堂<a class="heading-anchor" href="#124-创建加入与同步课堂" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>异常</th>
+<th>系统处理</th>
+<th>用户可恢复动作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>教师无有效权限</td>
+<td>阻止创建新课堂</td>
+<td>处理权益</td>
+</tr>
+<tr>
+<td>作品生成未完成或链接失效</td>
+<td>阻止创建</td>
+<td>等待/修复作品</td>
+</tr>
+<tr>
+<td>创建 Session 失败</td>
+<td>不展示无效二维码</td>
+<td>重试</td>
+</tr>
+<tr>
+<td>二维码错误、过期或课堂已结束</td>
+<td>学生端显示无法加入</td>
+<td>获取新二维码</td>
+</tr>
+<tr>
+<td>二维码被转发给非现场人员</td>
+<td>匿名模式难以识别真实身份；加入控制与教师移除能力待确认</td>
+<td>停止加入/移除待确认</td>
+</tr>
+<tr>
+<td>学生重复扫码</td>
+<td>恢复原临时编号或视为新参与者，规则待确认</td>
+<td>继续课堂</td>
+</tr>
+<tr>
+<td>学生端内容加载失败</td>
+<td>显示重试；是否保留独立答题能力待确认</td>
+<td>刷新/重连</td>
+</tr>
+<tr>
+<td>教师端内容加载失败</td>
+<td>开课前阻止开始；课堂中提供恢复</td>
+<td>重试</td>
+</tr>
+<tr>
+<td>某学生同步延迟</td>
+<td>显示“正在同步”，不得允许学生反向控制</td>
+<td>自动重试</td>
+</tr>
+<tr>
+<td>教师断线</td>
+<td>暂存 Session 并尝试恢复</td>
+<td>重连/接管待确认</td>
+</tr>
+<tr>
+<td>学生断线</td>
+<td>恢复当前课堂和互动状态</td>
+<td>自动重连</td>
+</tr>
+<tr>
+<td>作品内部操作不可同步</td>
+<td>使用待确认的降级方案</td>
+<td>待确认</td>
+</tr>
+</tbody></table></div>
+<h3 id="125-正式题与课堂工具">12.5 正式题与课堂工具<a class="heading-anchor" href="#125-正式题与课堂工具" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>异常</th>
+<th>系统处理</th>
+<th>用户可恢复动作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AI 题目结构非法</td>
+<td>在备课保存/课堂发布前阻止</td>
+<td>修改或重新生成</td>
+</tr>
+<tr>
+<td>题目总数达到 25</td>
+<td>禁止继续手动新增；追加生成不可用</td>
+<td>删除题目后再新增/追加</td>
+</tr>
+<tr>
+<td>当前题目数为 20–25</td>
+<td>固定追加 6 道会超过上限，禁止发起追加任务</td>
+<td>删除至 19 道或以下再追加</td>
+</tr>
+<tr>
+<td>教师重复点击发布</td>
+<td>同一次请求只能产生一个轮次</td>
+<td>查看当前轮次</td>
+</tr>
+<tr>
+<td>选择中包含本堂已发布题</td>
+<td>发布前再次过滤并提示；不得重复建立该题数据</td>
+<td>重新选择未发布题</td>
+</tr>
+<tr>
+<td>学生重复提交</td>
+<td>收集结束前以最后一次成功提交覆盖</td>
+<td>继续修改</td>
+</tr>
+<tr>
+<td>学生提交失败</td>
+<td>不显示假“已提交”</td>
+<td>重试</td>
+</tr>
+<tr>
+<td>结束收集时仍有在途提交</td>
+<td>按服务端确认顺序决定是否计入</td>
+<td>显示明确结果</td>
+</tr>
+<tr>
+<td>0 人提交</td>
+<td>展示 0 提交，正确率显示“—”</td>
+<td>继续教学</td>
+</tr>
+<tr>
+<td>部分学生未提交</td>
+<td>按题单独展示未提交，不计入该题正确率分母</td>
+<td>继续教学</td>
+</tr>
+<tr>
+<td>教师误发</td>
+<td>取消能力及是否进入报告待确认</td>
+<td>待确认</td>
+</tr>
+<tr>
+<td>互动期间新学生加入</td>
+<td>同步仍在收集的当前题组，允许学生从第 1 题自主开始；不补入已结束题组</td>
+<td>参与当前题组</td>
+</tr>
+</tbody></table></div>
+<h3 id="126-结束课堂与报告">12.6 结束课堂与报告<a class="heading-anchor" href="#126-结束课堂与报告" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>异常</th>
+<th>系统处理</th>
+<th>用户可恢复动作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>有互动仍在收集</td>
+<td>不得静默丢弃数据；结束/取消/返回三选一的方案待确认</td>
+<td>教师选择</td>
+</tr>
+<tr>
+<td>教师结束后立即关页</td>
+<td>报告是否后台继续生成待确认，建议继续</td>
+<td>从历史查看</td>
+</tr>
+<tr>
+<td>基础统计失败</td>
+<td>报告标记失败，不影响课堂已结束状态</td>
+<td>在原始数据有效期内重试待确认</td>
+</tr>
+<tr>
+<td>AI 文字复盘失败（如启用）</td>
+<td>展示基础统计，是否标记部分完成待确认</td>
+<td>是否允许重试待确认</td>
+</tr>
+<tr>
+<td>无正式题</td>
+<td>是否仍生成基础报告待确认</td>
+<td>查看课堂历史</td>
+</tr>
+<tr>
+<td>0 名学生</td>
+<td>是否仍生成“无学生参与”记录待确认</td>
+<td>查看课堂历史</td>
+</tr>
+<tr>
+<td>来源作品已删除</td>
+<td>已有课堂应使用冻结快照；冻结时点与删除策略待确认</td>
+<td>查看报告</td>
+</tr>
+<tr>
+<td>报告继续备课失败</td>
+<td>不修改来源报告</td>
+<td>重试</td>
+</tr>
+<tr>
+<td>教师误结束课堂</td>
+<td>能否撤销待确认；建议结束为不可逆终态，只能创建新课堂</td>
+<td>待确认</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="13-费用激活与权限规则">13. 费用、激活与权限规则<a class="heading-anchor" href="#13-费用激活与权限规则" aria-label="链接到本节">#</a></h2><h3 id="131-已确认规则">13.1 已确认规则<a class="heading-anchor" href="#131-已确认规则" aria-label="链接到本节">#</a></h3><ol>
+<li>初步商业方式为学校采购；</li>
+<li>学校把激活码发给教师；</li>
+<li>教师使用个人账号；</li>
+<li>产品不提供学校管理端；</li>
+<li>学生无需账号，匿名扫码加入，不承担费用；</li>
+<li>教师个人作品库和个人课堂历史保留。</li>
+</ol>
+<h3 id="132-权限矩阵">13.2 权限矩阵<a class="heading-anchor" href="#132-权限矩阵" aria-label="链接到本节">#</a></h3><p>只有“有效权益下的能力”和“学生匿名使用”已形成方向，未激活及到期后的细分能力需评审确认。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>能力</th>
+<th align="right">未激活教师</th>
+<th align="right">权益有效教师</th>
+<th align="right">权益到期教师</th>
+<th align="right">匿名学生</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>登录个人账号</td>
+<td align="right">待确认</td>
+<td align="right">是</td>
+<td align="right">待确认</td>
+<td align="right">不适用</td>
+</tr>
+<tr>
+<td>兑换激活码</td>
+<td align="right">是</td>
+<td align="right">是否可叠加待确认</td>
+<td align="right">是</td>
+<td align="right">否</td>
+</tr>
+<tr>
+<td>浏览资源广场</td>
+<td align="right">待确认</td>
+<td align="right">是</td>
+<td align="right">待确认</td>
+<td align="right">否</td>
+</tr>
+<tr>
+<td>收藏平台资源</td>
+<td align="right">待确认</td>
+<td align="right">是</td>
+<td align="right">待确认</td>
+<td align="right">否</td>
+</tr>
+<tr>
+<td>查看个人作品/历史/报告</td>
+<td align="right">待确认</td>
+<td align="right">是</td>
+<td align="right">待确认</td>
+<td align="right">否</td>
+</tr>
+<tr>
+<td>AI 生成或资源改编</td>
+<td align="right">否/待确认</td>
+<td align="right">是</td>
+<td align="right">待确认</td>
+<td align="right">否</td>
+</tr>
+<tr>
+<td>编辑已有作品</td>
+<td align="right">否/待确认</td>
+<td align="right">是</td>
+<td align="right">待确认</td>
+<td align="right">否</td>
+</tr>
+<tr>
+<td>自动生成/覆盖重生成/追加生成配套题</td>
+<td align="right">否/待确认</td>
+<td align="right">是</td>
+<td align="right">待确认</td>
+<td align="right">否</td>
+</tr>
+<tr>
+<td>创建新课堂</td>
+<td align="right">否/待确认</td>
+<td align="right">是</td>
+<td align="right">待确认</td>
+<td align="right">否</td>
+</tr>
+<tr>
+<td>扫码加入有效课堂</td>
+<td align="right">不适用</td>
+<td align="right">不适用</td>
+<td align="right">不适用</td>
+<td align="right">是</td>
+</tr>
+</tbody></table></div>
+<h3 id="133-激活码待确认规则">13.3 激活码待确认规则<a class="heading-anchor" href="#133-激活码待确认规则" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>主题</th>
+<th>待确认内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>码与账号关系</td>
+<td>是否一人一码、一次兑换、一个账号能否绑定多码</td>
+</tr>
+<tr>
+<td>权益起算</td>
+<td>采购、发放还是兑换时开始；授权时长</td>
+</tr>
+<tr>
+<td>叠加与续期</td>
+<td>未到期兑换是否顺延；到期后如何续期</td>
+</tr>
+<tr>
+<td>撤回与换绑</td>
+<td>学校/平台能否停用、撤回、重新分配；错绑如何处理</td>
+</tr>
+<tr>
+<td>状态查询</td>
+<td>学校是否能在无管理端的前提下获得激活使用状态</td>
+</tr>
+<tr>
+<td>过期处理</td>
+<td>到期前提醒、到期当日任务、进行中课堂和后台任务如何处理</td>
+</tr>
+<tr>
+<td>安全</td>
+<td>激活码长度、输入次数、风控、批次追踪、泄露处理</td>
+</tr>
+</tbody></table></div>
+<h3 id="134-费用待确认规则">13.4 费用待确认规则<a class="heading-anchor" href="#134-费用待确认规则" aria-label="链接到本节">#</a></h3><ul>
+<li>激活码单价、学校采购套餐和最低采购量；</li>
+<li>单个激活码授权时长；</li>
+<li>是否有试用码、试用时长和试用能力；</li>
+<li>AI 作品生成、重新生成和配套题生成额度；</li>
+<li>个人存储容量和作品数量；</li>
+<li>每月/每年可创建课堂数量；</li>
+<li>单堂课堂最大人数和时长；</li>
+<li>超额后的购买方式、提示与恢复；</li>
+<li>退款、转让、换绑和发票规则；</li>
+<li>教师是否能个人续费，还是必须继续由学校采购。</li>
+</ul>
+<h3 id="135-资产归属待确认规则">13.5 资产归属待确认规则<a class="heading-anchor" href="#135-资产归属待确认规则" aria-label="链接到本节">#</a></h3><ul>
+<li>教师更换学校后，原个人账号、作品、课堂历史和报告是否继续归教师；</li>
+<li>学校是否有权要求删除由其权益期间产生的数据；</li>
+<li>激活码所属学校是否在作品中展示；</li>
+<li>教师账号注销后的资产保留与删除规则。</li>
+</ul>
+<hr>
+<h2 id="14-数据隐私与安全规则">14. 数据、隐私与安全规则<a class="heading-anchor" href="#14-数据隐私与安全规则" aria-label="链接到本节">#</a></h2><h3 id="141-已确认的匿名原则">14.1 已确认的匿名原则<a class="heading-anchor" href="#141-已确认的匿名原则" aria-label="链接到本节">#</a></h3><ol>
+<li>学生完全匿名，不输入任何持续身份信息；</li>
+<li>每堂课只生成现场临时编号；</li>
+<li>临时编号只服务于当堂去重、答题修改和连接状态；</li>
+<li>不建立班级，不建立个人学情，不跨课堂关联；</li>
+<li>教师报告只展示整体数据。</li>
+</ol>
+<h3 id="142-建议的数据分层">14.2 建议的数据分层<a class="heading-anchor" href="#142-建议的数据分层" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>数据层</th>
+<th>用途</th>
+<th>长期保存规则</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>教师账号与权益</td>
+<td>登录、授权、个人资产归属</td>
+<td>保留期待确认</td>
+</tr>
+<tr>
+<td>个人作品与配套题</td>
+<td>备课、复用、开课</td>
+<td>教师个人库保留；删除规则待确认</td>
+</tr>
+<tr>
+<td>课堂快照与事件</td>
+<td>课堂恢复、报告生成</td>
+<td>保留内容与时长待确认</td>
+</tr>
+<tr>
+<td>临时编号—答案映射</td>
+<td>当堂去重、改答、断线恢复、报告汇总</td>
+<td>应最小化保存；解除关联时点待确认</td>
+</tr>
+<tr>
+<td>题目/工具汇总</td>
+<td>教师报告</td>
+<td>可作为报告长期数据；保留期待确认</td>
+</tr>
+<tr>
+<td>产品埋点</td>
+<td>市场验证和稳定性</td>
+<td>去标识化方案、保留期待确认</td>
+</tr>
+</tbody></table></div>
+<h3 id="143-待确认的隐私与安全事项">14.3 待确认的隐私与安全事项<a class="heading-anchor" href="#143-待确认的隐私与安全事项" aria-label="链接到本节">#</a></h3><ul>
+<li>临时编号与原始答案映射在课堂结束后立即删除，还是在报告失败重试窗口后删除；</li>
+<li>匿名原始数据最长保留时间；</li>
+<li>当只有 1–2 名参与者时，整体选项分布事实上可能暴露个人选择；是否设置最小展示人数或合并/隐藏小样本：待确认；</li>
+<li>教师能否下载课堂数据明细；按当前匿名原则不应包含临时编号轨迹；</li>
+<li>教师内容、上传教案和托管链接的访问控制；</li>
+<li>现有服务托管作品链接是否公开可访问、是否带签名及失效时间；</li>
+<li>数据存储地区、传输/静态加密、备份与恢复要求；</li>
+<li>教师账号注销、数据导出和删除机制；</li>
+<li>面向未成年学生的隐私告知、学校授权及合规文本；</li>
+<li>运营人员访问教师内容与报告的权限和审计规则；</li>
+<li>AI 生成使用教师教案、课堂汇总数据时的数据使用边界。</li>
+</ul>
+<hr>
+<h2 id="15-非功能要求与研发核验">15. 非功能要求与研发核验<a class="heading-anchor" href="#15-非功能要求与研发核验" aria-label="链接到本节">#</a></h2><h3 id="151-现有能力复用边界">15.1 现有能力复用边界<a class="heading-anchor" href="#151-现有能力复用边界" aria-label="链接到本节">#</a></h3><p>Teeko 复用现有教学作品生成服务完成教学作品生成。当前已确认：</p>
+<ul>
+<li>有稳定生成能力/API；</li>
+<li>可返回托管的 HTML 教学作品链接；</li>
+<li>作品版本不可变；</li>
+<li>可返回内容摘要；</li>
+<li>学生端可以只读运行教学作品；</li>
+</ul>
+<p>Teeko 需要建设的产品能力：</p>
+<ul>
+<li>教师账号与激活权益；</li>
+<li>个人作品、收藏、课堂历史和报告；</li>
+<li>配套正式题及题目管理；</li>
+<li>课堂 Session、二维码、匿名参与、实时互动；</li>
+<li>教师内容状态向学生端同步；</li>
+<li>整体课堂报告和报告继续备课；</li>
+</ul>
+<h3 id="152-p0-技术核验清单">15.2 P0 技术核验清单<a class="heading-anchor" href="#152-p0-技术核验清单" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>核验项</th>
+<th>为什么必须确认</th>
+<th>不通过的影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>作品内部状态读取</td>
+<td>需要知道教师当前页、场景、控件和游戏状态</td>
+<td>学生只能打开相同 URL，无法真正跟随教师</td>
+</tr>
+<tr>
+<td>学生端状态恢复</td>
+<td>需要把教师操作效果只读复现</td>
+<td>核心课堂体验无法验收</td>
+</tr>
+<tr>
+<td>各作品形态支持矩阵</td>
+<td>HTML、动画、3D、游戏的同步复杂度不同</td>
+<td>必须收缩首版可开课作品范围或设计降级</td>
+</tr>
+<tr>
+<td>生成 API 与回调</td>
+<td>确保任务状态、重试和幂等</td>
+<td>页面无法显示真实任务状态</td>
+</tr>
+<tr>
+<td>现有作品编辑/资源改编能力</td>
+<td>确认哪些作品可编辑、入口如何接入</td>
+<td>“修改并保存个人版本”可能无法落地</td>
+</tr>
+<tr>
+<td>作品编辑后版本机制</td>
+<td>开课依赖明确快照</td>
+<td>会出现内容/题目/课堂版本冲突</td>
+</tr>
+<tr>
+<td>托管内容嵌入与安全限制</td>
+<td>核验 iframe、跨域、CSP、X-Frame-Options、事件 SDK 和控件屏蔽</td>
+<td>作品即使可访问，也可能无法在学生端安全同步</td>
+</tr>
+<tr>
+<td>托管链接权限与时效</td>
+<td>学生扫码和历史作品访问依赖链接</td>
+<td>课堂或历史作品可能失效</td>
+</tr>
+<tr>
+<td>内容摘要结构与质量</td>
+<td>自动出题和继续备课依赖摘要</td>
+<td>配套题与报告承接质量不可控</td>
+</tr>
+</tbody></table></div>
+<h3 id="153-性能与稳定性待确认">15.3 性能与稳定性待确认<a class="heading-anchor" href="#153-性能与稳定性待确认" aria-label="链接到本节">#</a></h3><ul>
+<li>教学作品生成、配套题生成和报告生成的超时目标；</li>
+<li>课堂扫码加入耗时目标；</li>
+<li>教师操作到学生端呈现的 P50/P95 延迟；</li>
+<li>单课堂并发学生数、单教师并发课堂数；</li>
+<li>学生断线重连窗口；</li>
+<li>课堂实时消息丢失、乱序和重放策略；</li>
+<li>后台任务重试次数与失败告警；</li>
+<li>课堂和报告服务可用性目标；</li>
+<li>弱网、校园 Wi-Fi 和平板低性能设备下的降级策略。</li>
+</ul>
+<h3 id="154-兼容性与体验待确认">15.4 兼容性与体验待确认<a class="heading-anchor" href="#154-兼容性与体验待确认" aria-label="链接到本节">#</a></h3><ul>
+<li>教师端支持的桌面浏览器及最低版本；</li>
+<li>学生平板的 iPadOS/Android 范围、浏览器及最低版本；</li>
+<li>横屏/竖屏规则；</li>
+<li>是否支持教师手机端；</li>
+<li>UI 界面语言是否跟随教学语言，还是单独设置；</li>
+<li>繁体中文字体、英文排版及无障碍要求；</li>
+<li>二维码相机权限失败时是否支持输入课堂码。</li>
+</ul>
+<h3 id="155-可观测性与运营待确认">15.5 可观测性与运营待确认<a class="heading-anchor" href="#155-可观测性与运营待确认" aria-label="链接到本节">#</a></h3><ul>
+<li>生成任务、开课、同步、提交和报告的关键日志和告警；</li>
+<li>不含学生身份的课堂故障排查标识；</li>
+<li>平台资源发布、下架和质量审核流程；</li>
+<li>激活码批次生成、交付、查错和客服工具；</li>
+<li>运营后台是否进入本期研发范围。</li>
+</ul>
+<hr>
+<h2 id="16-验收标准">16. 验收标准<a class="heading-anchor" href="#16-验收标准" aria-label="链接到本节">#</a></h2><h3 id="161-验收说明">16.1 验收说明<a class="heading-anchor" href="#161-验收说明" aria-label="链接到本节">#</a></h3><ul>
+<li>以下标准仅覆盖已经确认的需求和为了链路成立而不可缺少的基础行为。</li>
+<li>标为“待确认”的规则不进入最终验收，需产品决策后补充对应标准。</li>
+<li>学生只读同步的最终验收范围，以第 15.2 节技术核验形成的“可支持作品/操作清单”为前置条件。</li>
+</ul>
+<h3 id="162-账号范围与资产">16.2 账号、范围与资产<a class="heading-anchor" href="#162-账号范围与资产" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>Given</th>
+<th>When</th>
+<th>Then</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AC-A01</td>
+<td>学校已向教师提供有效激活码</td>
+<td>教师使用个人账号完成激活</td>
+<td>教师获得产品使用权益并进入个人使用空间</td>
+</tr>
+<tr>
+<td>AC-A02</td>
+<td>教师已登录</td>
+<td>教师查看产品导航</td>
+<td>不出现学校管理、班级管理、学生管理或学校资源库入口</td>
+</tr>
+<tr>
+<td>AC-A03</td>
+<td>教师已有个人作品和课堂历史</td>
+<td>教师重新登录个人账号</td>
+<td>能继续看到其个人作品库和个人课堂历史</td>
+</tr>
+<tr>
+<td>AC-A04</td>
+<td>学生扫描课堂二维码</td>
+<td>进入课堂</td>
+<td>全流程不要求注册、登录、姓名、学号或班级信息</td>
+</tr>
+</tbody></table></div>
+<h3 id="163-独立备课与生成">16.3 独立备课与生成<a class="heading-anchor" href="#163-独立备课与生成" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>Given</th>
+<th>When</th>
+<th>Then</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AC-P01</td>
+<td>教师未选择学科和教学语言，但已提供教学要求或教案</td>
+<td>提交生成</td>
+<td>系统创建生成任务，不提示补选学科或教学语言</td>
+</tr>
+<tr>
+<td>AC-P02</td>
+<td>学科和语言均未选择</td>
+<td>教学要求和教案也均未提供并提交</td>
+<td>系统只提示至少提供教学要求或教案其中一项</td>
+</tr>
+<tr>
+<td>AC-P03</td>
+<td>教师只填写教学要求</td>
+<td>提交生成</td>
+<td>系统能创建教学作品生成任务</td>
+</tr>
+<tr>
+<td>AC-P04</td>
+<td>教师只上传可解析教案</td>
+<td>提交生成</td>
+<td>系统能以教案创建教学作品生成任务</td>
+</tr>
+<tr>
+<td>AC-P05</td>
+<td>教师同时提供教案和补充要求</td>
+<td>提交生成</td>
+<td>两类输入进入生成任务；已选择的学科、语言作为明确约束，未选择项不伪造教师选择值</td>
+</tr>
+<tr>
+<td>AC-P10</td>
+<td>教师登录成功进入首页</td>
+<td>页面完成加载</td>
+<td>首屏主操作为对话式备课输入区，不需要先点击“开始备课”</td>
+</tr>
+<tr>
+<td>AC-P11</td>
+<td>教师查看首页对话式备课输入区</td>
+<td>查看底部操作区</td>
+<td>“上传教案”位于左下角，学科和教学语言均标记为可选</td>
+</tr>
+<tr>
+<td>AC-P12</td>
+<td>教师在首页提供有效输入</td>
+<td>点击“生成教学作品”</td>
+<td>系统直接进入 T05，不强制先进入 T04</td>
+</tr>
+<tr>
+<td>AC-P06</td>
+<td>现有教学作品生成服务成功返回作品且自动出题完成</td>
+<td>系统进入 T06</td>
+<td>页面显示“未保存”，结果具有不可变版本 ID、托管链接和内容摘要，且 T09 中不存在该作品</td>
+</tr>
+<tr>
+<td>AC-P13</td>
+<td>T06 显示一个未保存生成结果</td>
+<td>教师点击“保存”且保存成功</td>
+<td>作品与配套题只新增一次到 T09；刷新后仍存在并可创建课堂</td>
+</tr>
+<tr>
+<td>AC-P14</td>
+<td>T06 显示一个未保存生成结果</td>
+<td>教师未点击保存即离开并进入 T09</td>
+<td>该生成结果不出现在个人作品库，且可从生成任务恢复入口继续编辑</td>
+</tr>
+<tr>
+<td>AC-P07</td>
+<td>现有服务返回 HTML、动画、游戏或其他非 PPT 形态</td>
+<td>教师打开作品</td>
+<td>产品按教学作品展示，不因没有 PPT 页码而阻断保存或后续开课</td>
+</tr>
+<tr>
+<td>AC-P08</td>
+<td>内容生成失败</td>
+<td>教师查看任务</td>
+<td>页面显示真实失败状态并提供恢复入口，不展示为成功作品</td>
+</tr>
+<tr>
+<td>AC-P09</td>
+<td>内容成功但配套题失败</td>
+<td>教师查看作品</td>
+<td>教学内容仍被保留，题目失败可独立识别和重试</td>
+</tr>
+</tbody></table></div>
+<h3 id="164-配套题">16.4 配套题<a class="heading-anchor" href="#164-配套题" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>Given</th>
+<th>When</th>
+<th>Then</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AC-Q01</td>
+<td>新教学作品已生成且有内容摘要</td>
+<td>自动出题流程运行</td>
+<td>生成结果只包含单选、多选或判断题</td>
+</tr>
+<tr>
+<td>AC-Q02</td>
+<td>AI 题目已经生成</td>
+<td>教师打开作品页</td>
+<td>页面不显示题目来源，也不要求逐题确认；作品首次入库仍必须由教师明确保存</td>
+</tr>
+<tr>
+<td>AC-Q03</td>
+<td>教师查看配套题</td>
+<td>修改、删除、手动新增或触发重新生成</td>
+<td>对应操作可执行，并保留在当前草稿或已保存个人作品中</td>
+</tr>
+<tr>
+<td>AC-Q04</td>
+<td>作品为 PPT</td>
+<td>教师编辑题目</td>
+<td>题目可选择关联具体页，但仍可在其他教学时点发布</td>
+</tr>
+<tr>
+<td>AC-Q05</td>
+<td>作品为任意非 PPT 形态，包括带内部页面/路由的 HTML</td>
+<td>教师查看或发布题目</td>
+<td>题目只关联整份作品，不提供页码关联</td>
+</tr>
+<tr>
+<td>AC-Q06</td>
+<td>教师修改教学作品内容</td>
+<td>保存新内容版本</td>
+<td>系统不自动覆盖或更新原配套题</td>
+</tr>
+<tr>
+<td>AC-Q07</td>
+<td>托管 HTML 内部存在练习按钮</td>
+<td>学生只读跟随内容</td>
+<td>内部练习不会被当作 Teeko 正式答题提交或进入正式题报告</td>
+</tr>
+<tr>
+<td>AC-Q08</td>
+<td>新教学作品生成结果完成</td>
+<td>自动出题完成</td>
+<td>未保存结果默认得到 6 道配套题，总数不超过 25</td>
+</tr>
+<tr>
+<td>AC-Q09</td>
+<td>当前作品有任意数量配套题</td>
+<td>教师确认重新生成</td>
+<td>当前全部题目被新的 6 道题覆盖；已冻结课堂快照不改变</td>
+</tr>
+<tr>
+<td>AC-Q10</td>
+<td>当前作品有 19 道或以下题目</td>
+<td>教师点击追加生成</td>
+<td>固定追加 6 道，追加后总数不超过 25</td>
+</tr>
+<tr>
+<td>AC-Q11</td>
+<td>当前作品有 20–25 道题目</td>
+<td>教师查看题目管理</td>
+<td>追加 6 道不可用，并明确说明 25 道上限</td>
+</tr>
+<tr>
+<td>AC-Q12</td>
+<td>课堂已经开始</td>
+<td>教师进入授课页</td>
+<td>不提供编辑、新增、删除、重新生成本堂题目的能力</td>
+</tr>
+</tbody></table></div>
+<h3 id="165-资源广场与个人版本">16.5 资源广场与个人版本<a class="heading-anchor" href="#165-资源广场与个人版本" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>Given</th>
+<th>When</th>
+<th>Then</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AC-R01</td>
+<td>教师打开平台资源详情</td>
+<td>查看资源</td>
+<td>页面不展示资源自带的正式配套题</td>
+</tr>
+<tr>
+<td>AC-R02</td>
+<td>教师对平台资源点击收藏</td>
+<td>操作成功</td>
+<td>只增加收藏关系，不自动创建个人作品</td>
+</tr>
+<tr>
+<td>AC-R03</td>
+<td>教师点击“使用并修改”</td>
+<td>复制完成</td>
+<td>系统创建可修改、可保存的个人版本</td>
+</tr>
+<tr>
+<td>AC-R04</td>
+<td>个人版本已建立</td>
+<td>教师修改并保存</td>
+<td>平台原资源不发生变化</td>
+</tr>
+<tr>
+<td>AC-R05</td>
+<td>个人版本保存完成</td>
+<td>自动出题运行</td>
+<td>题目基于个人教学作品生成，而不是读取平台资源题库</td>
+</tr>
+<tr>
+<td>AC-R06</td>
+<td>教师已经收藏平台资源</td>
+<td>进入“我的收藏”</td>
+<td>能重新找到收藏记录并打开仍可用的资源详情</td>
+</tr>
+</tbody></table></div>
+<h3 id="166-创建课堂与匿名加入">16.6 创建课堂与匿名加入<a class="heading-anchor" href="#166-创建课堂与匿名加入" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>Given</th>
+<th>When</th>
+<th>Then</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AC-C01</td>
+<td>教师从可用个人作品创建并开始课堂</td>
+<td>课堂进入进行中</td>
+<td>系统已经冻结一个明确的不可变作品版本和配套题快照；具体冻结动作发生在创建或开始阶段待确认</td>
+</tr>
+<tr>
+<td>AC-C02</td>
+<td>课堂快照已经冻结</td>
+<td>教师继续编辑原个人作品</td>
+<td>本堂课堂的内容和题目快照不改变</td>
+</tr>
+<tr>
+<td>AC-C03</td>
+<td>学生扫描有效二维码</td>
+<td>校验成功</td>
+<td>学生获得只在本堂有效的临时编号并进入候课/当前课堂状态</td>
+</tr>
+<tr>
+<td>AC-C04</td>
+<td>学生进入课堂</td>
+<td>查看任何页面</td>
+<td>不要求学生提供可持续身份信息</td>
+</tr>
+<tr>
+<td>AC-C05</td>
+<td>课堂已经结束</td>
+<td>学生再次扫描二维码</td>
+<td>系统拒绝加入并显示课堂已结束状态</td>
+</tr>
+<tr>
+<td>AC-C06</td>
+<td>课堂进行中且二维码有效</td>
+<td>迟到学生扫码</td>
+<td>获得本堂临时编号并进入当前教学内容；若题组收集中则可立即参与</td>
+</tr>
+</tbody></table></div>
+<h3 id="167-教学内容只读同步">16.7 教学内容只读同步<a class="heading-anchor" href="#167-教学内容只读同步" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>Given</th>
+<th>When</th>
+<th>Then</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AC-S01</td>
+<td>学生已加入进行中的课堂</td>
+<td>教师切换受支持的页面或场景</td>
+<td>学生端只读呈现同一当前状态</td>
+</tr>
+<tr>
+<td>AC-S02</td>
+<td>学生端正在跟随</td>
+<td>学生尝试点击、翻页或操作作品</td>
+<td>不改变教师端或课堂的教学状态</td>
+</tr>
+<tr>
+<td>AC-S03</td>
+<td>教师操作研发确认支持的动画、3D、控件或游戏状态</td>
+<td>同步消息到达学生端</td>
+<td>学生端显示操作后的效果但不可操作</td>
+</tr>
+<tr>
+<td>AC-S04</td>
+<td>教师发布互动</td>
+<td>学生端正在展示教学内容</td>
+<td>学生端优先切换到对应互动页</td>
+</tr>
+<tr>
+<td>AC-S05</td>
+<td>互动结束并返回教学</td>
+<td>学生端恢复内容</td>
+<td>展示教师当前教学状态，而不是学生自行选择的状态</td>
+</tr>
+<tr>
+<td>AC-S06</td>
+<td>学生短暂断线后恢复</td>
+<td>重新连接课堂</td>
+<td>学生端获取最新课堂状态；临时编号恢复机制待技术方案确认</td>
+</tr>
+</tbody></table></div>
+<h3 id="168-正式题">16.8 正式题<a class="heading-anchor" href="#168-正式题" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>Given</th>
+<th>When</th>
+<th>Then</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AC-I01</td>
+<td>课堂快照中有配套题</td>
+<td>教师在任意教学时点发布</td>
+<td>学生端收到题目，不受页码关联限制</td>
+</tr>
+<tr>
+<td>AC-I02</td>
+<td>作品没有页结构</td>
+<td>教师发布整份作品配套题</td>
+<td>正常创建答题轮次，不要求选择当前页</td>
+</tr>
+<tr>
+<td>AC-I03</td>
+<td>正式题选择器打开且有未发布题</td>
+<td>教师单选、多选或全选 1–25 道并发布</td>
+<td>所选题目作为同一题组一次全部下发</td>
+</tr>
+<tr>
+<td>AC-I04</td>
+<td>学生收到含多道题的题组</td>
+<td>不同学生以不同速度答题</td>
+<td>每名学生可自主切题，系统不把所有学生锁定在同一道题</td>
+</tr>
+<tr>
+<td>AC-I05</td>
+<td>正式题组正在收集</td>
+<td>学生修改任一道题答案</td>
+<td>该题最后一次成功自动保存替代此前答案</td>
+</tr>
+<tr>
+<td>AC-I06</td>
+<td>多选题有多个正确答案</td>
+<td>学生只选中部分或额外选择错误项</td>
+<td>判为错误；只有所选集合与正确集合完全相同才判对</td>
+</tr>
+<tr>
+<td>AC-I07</td>
+<td>题组包含本堂已经发布过的题目</td>
+<td>教师再次打开选择器</td>
+<td>已发布题不可选，发布接口也拒绝重复题 ID</td>
+</tr>
+<tr>
+<td>AC-I08</td>
+<td>正式题正在收集</td>
+<td>教师或学生尝试开启另一互动</td>
+<td>系统保持当前轮次，不创建第二个并行收集轮次</td>
+</tr>
+<tr>
+<td>AC-I09</td>
+<td>教师结束收集</td>
+<td>学生再次修改</td>
+<td>系统不再接受修改，并保留各题最后成功保存的答案</td>
+</tr>
+<tr>
+<td>AC-I10</td>
+<td>教师公布结果</td>
+<td>学生查看结果页</td>
+<td>逐题看到个人答案、正确答案、解析与全班匿名分布</td>
+</tr>
+<tr>
+<td>AC-I11</td>
+<td>某题有未提交学生</td>
+<td>系统计算结果</td>
+<td>未提交人数单独展示且不进入正确率分母；0 有效提交时显示“—”</td>
+</tr>
+<tr>
+<td>AC-I12</td>
+<td>题组收集中</td>
+<td>迟到学生成功加入</td>
+<td>学生可从第 1 题开始自主作答当前题组</td>
+</tr>
+</tbody></table></div>
+<h3 id="169-投票与信号灯">16.9 投票与信号灯<a class="heading-anchor" href="#169-投票与信号灯" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>Given</th>
+<th>When</th>
+<th>Then</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AC-T01</td>
+<td>教师在课堂中创建投票</td>
+<td>输入问题和 2–4 个选项并发布</td>
+<td>学生可收到并提交投票</td>
+</tr>
+<tr>
+<td>AC-T02</td>
+<td>投票已结束</td>
+<td>系统计算结果</td>
+<td>结果只展示选项分布，不计算正确率</td>
+</tr>
+<tr>
+<td>AC-T03</td>
+<td>教师发起信号灯</td>
+<td>学生选择反馈</td>
+<td>教师看到匿名整体分布，不产生题目正确率</td>
+</tr>
+</tbody></table></div>
+<h3 id="1610-报告历史与继续备课">16.10 报告、历史与继续备课<a class="heading-anchor" href="#1610-报告历史与继续备课" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>Given</th>
+<th>When</th>
+<th>Then</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AC-B01</td>
+<td>教师结束课堂</td>
+<td>结束处理完成</td>
+<td>课堂进入个人课堂历史并提供报告生成状态/入口；自动或手动触发待确认</td>
+</tr>
+<tr>
+<td>AC-B02</td>
+<td>报告生成成功</td>
+<td>教师打开报告</td>
+<td>页面展示课堂整体数据，不展示临时编号或个人答题轨迹</td>
+</tr>
+<tr>
+<td>AC-B03</td>
+<td>同一匿名参与者在一个题组内多次修改某题答案</td>
+<td>教师结束收集并生成报告</td>
+<td>每道题只按最后一次成功保存计入整体汇总，汇总中不包含临时编号</td>
+</tr>
+<tr>
+<td>AC-B04</td>
+<td>教师点击“基于本次课堂继续备课”</td>
+<td>选择课堂反馈并确认</td>
+<td>系统进入新建备课并携带所选报告上下文</td>
+</tr>
+<tr>
+<td>AC-B05</td>
+<td>教师在继续备课页按最终确认的输入规则提交生成</td>
+<td>新作品生成成功</td>
+<td>形成新的未保存作品结果与配套题；教师保存后才成为独立个人作品，不覆盖来源作品或报告</td>
+</tr>
+<tr>
+<td>AC-B06</td>
+<td>报告用于下一次备课</td>
+<td>系统组织上下文</td>
+<td>不要求选择班级，不尝试识别是否为同一批学生</td>
+</tr>
+</tbody></table></div>
+<h3 id="1611-范围验收">16.11 范围验收<a class="heading-anchor" href="#1611-范围验收" aria-label="链接到本节">#</a></h3><p>发布候选版本中不得出现以下作为可用功能的入口：学校管理、人员管理、班级/学生名单、学期结构、学校资源库、学校级数据看板、教学作品 PDF 导出、简答题以及除投票和信号灯外的课堂小工具。</p>
+<hr>
+<h2 id="17-原型交付要求">17. 原型交付要求<a class="heading-anchor" href="#17-原型交付要求" aria-label="链接到本节">#</a></h2><p>产品原型至少要覆盖：</p>
+<ol>
+<li>教师未激活、激活成功和权益异常入口；</li>
+<li>首页首次使用、回访、后台任务和加载失败；首页首屏必须展示对话式备课输入区；</li>
+<li>首页和独立备课页均覆盖提示词、教案上传和两者组合，并展示学科/语言可选状态；首页“上传教案”入口位于对话输入区左下角；</li>
+<li>生成中、内容失败、题目失败、生成成功进入 T06 未保存态、保存成功与保存失败；</li>
+<li>资源收藏、使用并修改、个人版本保存；</li>
+<li>分页作品和非分页 HTML/互动作品两种作品详情；</li>
+<li>配套题编辑、无页关联和重新生成入口；</li>
+<li>教师候课、学生扫码、课堂开始；</li>
+<li>教师操作内容与学生端只读效果的双端示意；</li>
+<li>单选、多选、判断题的发布、改答、结束和公布；</li>
+<li>投票和信号灯；</li>
+<li>教师/学生断线、同步中和课堂结束；</li>
+<li>基础报告生成与整体报告；若后续确认 AI 文字复盘，再补充“部分完成”状态；</li>
+<li>从报告选择反馈并进入下一次备课；</li>
+<li>所有 P0 待确认项在原型中的临时占位与评审注释。</li>
+</ol>
+<hr>
+<h2 id="18-待确认事项总表">18. 待确认事项总表<a class="heading-anchor" href="#18-待确认事项总表" aria-label="链接到本节">#</a></h2><h3 id="181-p0不确认会阻塞范围或核心链路">18.1 P0：不确认会阻塞范围或核心链路<a class="heading-anchor" href="#181-p0不确认会阻塞范围或核心链路" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>待确认事项</th>
+<th>影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TBD-P0-01</td>
+<td>登录方式及注册/找回流程</td>
+<td>T01 原型和账号开发</td>
+</tr>
+<tr>
+<td>TBD-P0-02</td>
+<td>激活码绑定、有效期、叠加、撤回和到期权限</td>
+<td>商业闭环、权限矩阵和异常流程</td>
+</tr>
+<tr>
+<td>TBD-P0-03</td>
+<td>现有教学作品的内部状态读取与学生端恢复能力</td>
+<td>学生只读同步能否成立</td>
+</tr>
+<tr>
+<td>TBD-P0-04</td>
+<td>首版支持同步的作品形态/操作清单，以及不支持时的降级</td>
+<td>可开课作品范围和验收边界</td>
+</tr>
+<tr>
+<td>TBD-P0-05</td>
+<td>生成 API、回调、重试、幂等和编辑后的不可变版本机制</td>
+<td>作品状态、课堂快照和错误恢复</td>
+</tr>
+<tr>
+<td>TBD-P0-06</td>
+<td>教案支持格式、大小、数量、页数和解析边界</td>
+<td>备课输入与异常页面</td>
+</tr>
+<tr>
+<td>TBD-P0-07</td>
+<td>默认 6 道配套题中单选、多选、判断题的数量组合</td>
+<td>出题结构和题目列表体验</td>
+</tr>
+<tr>
+<td>TBD-P0-08</td>
+<td>是否允许无题/题目生成失败的作品开课</td>
+<td>内容成功但题目失败分支</td>
+</tr>
+<tr>
+<td>TBD-P0-09</td>
+<td>教师误发互动后的取消规则，以及取消数据是否进入报告</td>
+<td>课堂互动状态机</td>
+</tr>
+<tr>
+<td>TBD-P0-10</td>
+<td>课堂结束时仍有互动收集的处理</td>
+<td>数据一致性和教师操作</td>
+</tr>
+<tr>
+<td>TBD-P0-11</td>
+<td>无学生、无题、0 提交及只有课堂工具时的报告规则</td>
+<td>报告是否覆盖所有课堂终态</td>
+</tr>
+<tr>
+<td>TBD-P0-12</td>
+<td>匿名原始数据保留时长及汇总后解除关联时点</td>
+<td>报告重试、隐私和存储</td>
+</tr>
+<tr>
+<td>TBD-P0-14</td>
+<td>托管 HTML 链接的鉴权和有效期</td>
+<td>学生课堂和历史作品访问</td>
+</tr>
+<tr>
+<td>TBD-P0-15</td>
+<td>现有教学作品生成服务的编辑入口、资源改编能力，以及保存后的新版本/摘要机制</td>
+<td>“可修改并保存个人版本”能否真实落地</td>
+</tr>
+<tr>
+<td>TBD-P0-16</td>
+<td>托管内容的 iframe/跨域/CSP/事件 SDK/控件屏蔽能力</td>
+<td>学生端能否安全嵌入并只读同步</td>
+</tr>
+<tr>
+<td>TBD-P0-17</td>
+<td>作品与题目快照在创建课堂还是开始课堂时冻结</td>
+<td>候课期间编辑、开课内容一致性</td>
+</tr>
+<tr>
+<td>TBD-P0-18</td>
+<td>报告自动生成还是教师触发，以及生成任务离页规则</td>
+<td>结束课堂后的正常流程和页面状态</td>
+</tr>
+<tr>
+<td>TBD-P0-19</td>
+<td>首版最小报告字段、最小可带入备课上下文及报告反馈是否算有效生成输入</td>
+<td>报告闭环和 T04 校验无法最终验收</td>
+</tr>
+</tbody></table></div>
+<h3 id="182-p1影响主要页面与体验">18.2 P1：影响主要页面与体验<a class="heading-anchor" href="#182-p1影响主要页面与体验" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>待确认事项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TBD-P1-01</td>
+<td>学科控件是固定列表、可搜索还是自由输入</td>
+</tr>
+<tr>
+<td>TBD-P1-02</td>
+<td>提示词与教案冲突时的优先级</td>
+</tr>
+<tr>
+<td>TBD-P1-03</td>
+<td>分别确认作品生成、配套题、基础报告任务离页后是否继续，以及各任务是否可主动取消</td>
+</tr>
+<tr>
+<td>TBD-P1-05</td>
+<td>题干、选项、解析限制和题目合法性校验</td>
+</tr>
+<tr>
+<td>TBD-P1-06</td>
+<td>资源广场搜索、筛选、分类、排序和推荐</td>
+</tr>
+<tr>
+<td>TBD-P1-07</td>
+<td>平台资源下架/更新后，收藏和个人版本的处理</td>
+</tr>
+<tr>
+<td>TBD-P1-08</td>
+<td>个人作品搜索、排序、文件夹、标签、副本、删除和版本历史</td>
+</tr>
+<tr>
+<td>TBD-P1-09</td>
+<td>是否允许 0 人开始课堂</td>
+</tr>
+<tr>
+<td>TBD-P1-10</td>
+<td>二维码、候课、课堂最长时长和自动结束策略</td>
+</tr>
+<tr>
+<td>TBD-P1-11</td>
+<td>临时编号在学生/教师端的展示、重复扫码、刷新和断线恢复机制</td>
+</tr>
+<tr>
+<td>TBD-P1-13</td>
+<td>教师误发后的取消入口、可取消时点及取消轮次是否进入报告</td>
+</tr>
+<tr>
+<td>TBD-P1-14</td>
+<td>投票是否固定单选、能否改答、是否必须公布、是否进入报告</td>
+</tr>
+<tr>
+<td>TBD-P1-15</td>
+<td>信号灯文案、改答、结束、公布及报告规则</td>
+</tr>
+<tr>
+<td>TBD-P1-16</td>
+<td>最小闭环之外的扩展报告字段、是否提供 AI 文字复盘、AI 提示词与教师课堂观察</td>
+</tr>
+<tr>
+<td>TBD-P1-17</td>
+<td>最小带入结构之外的默认字段、多报告引用和重复引用规则</td>
+</tr>
+<tr>
+<td>TBD-P1-18</td>
+<td>课堂历史、报告和作品的删除及级联关系</td>
+</tr>
+<tr>
+<td>TBD-P1-19</td>
+<td>二维码转发风险、停止加入、匿名参与者移除或封禁规则</td>
+</tr>
+</tbody></table></div>
+<h3 id="183-p2商业运营与扩展">18.3 P2：商业、运营与扩展<a class="heading-anchor" href="#183-p2商业运营与扩展" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>待确认事项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TBD-P2-01</td>
+<td>激活码价格、套餐、授权时长、试用、退款与发票</td>
+</tr>
+<tr>
+<td>TBD-P2-02</td>
+<td>AI、存储和课堂人数/次数额度</td>
+</tr>
+<tr>
+<td>TBD-P2-03</td>
+<td>教师能否个人续费，学校是否获得激活状态</td>
+</tr>
+<tr>
+<td>TBD-P2-04</td>
+<td>教师更换学校、账号注销后的资产归属</td>
+</tr>
+<tr>
+<td>TBD-P2-05</td>
+<td>平台运营后台是否纳入本期原型/研发</td>
+</tr>
+<tr>
+<td>TBD-P2-06</td>
+<td>平台资源上架、审核、更新和下架机制</td>
+</tr>
+<tr>
+<td>TBD-P2-07</td>
+<td>数据保留、合规文本、运营访问和审计规则</td>
+</tr>
+<tr>
+<td>TBD-P2-08</td>
+<td>目标设备、浏览器、同步延迟、并发量和服务可用性数值</td>
+</tr>
+<tr>
+<td>TBD-P2-09</td>
+<td>UI 界面语言与教学语言的关系</td>
+</tr>
+<tr>
+<td>TBD-P2-10</td>
+<td>成功指标的基线、目标值和市场验证周期</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="19-建议评审顺序">19. 建议评审顺序<a class="heading-anchor" href="#19-建议评审顺序" aria-label="链接到本节">#</a></h2><ol>
+<li><strong>产品评审</strong>：先锁定第 18.1 节的业务状态和最小发布范围；</li>
+<li><strong>教学作品生成能力评审</strong>：验证生成、版本、摘要、托管链接和内容同步接口；</li>
+<li><strong>实时课堂技术评审</strong>：明确双端同步方式、作品支持矩阵、并发与弱网策略；</li>
+<li><strong>数据与隐私评审</strong>：锁定临时编号、原始答案、报告汇总和删除规则；</li>
+<li><strong>商业与权益评审</strong>：锁定激活码、授权到期与费用额度；</li>
+<li><strong>原型评审</strong>：依据确定后的状态机补齐全部页面状态；</li>
+<li><strong>验收评审</strong>：将已确认的待确认项转为 Given/When/Then 标准并形成发布清单。</li>
+</ol>
+<hr>
+<h2 id="20-结论">20. 结论<a class="heading-anchor" href="#20-结论" aria-label="链接到本节">#</a></h2><p>Teeko 的最小闭环不是“生成一份课件”，而是：教师获得使用权益后，生成或改编教学作品与配套题，并在编辑页明确保存为可复用的个人教学作品；教师用已保存作品创建真实课堂；匿名学生在平板端只读跟随内容并参与互动；系统根据真实整体数据生成教师报告；教师再主动把报告反馈带入下一次备课。</p>
+<p>本产品范围不包含学校管理、班级管理与长期学生身份。首版研发最大的技术不确定性不是作品能否在学生端打开，而是教师对复杂 HTML、动画、3D 和游戏的操作状态能否被稳定地只读同步；该项必须在原型定稿和研发排期前完成技术核验。</p>
+<hr>
+<h2 id="附录-a已知能力与样例参考">附录 A：已知能力与样例参考<a class="heading-anchor" href="#附录-a已知能力与样例参考" aria-label="链接到本节">#</a></h2><ul>
+<li>教学作品生成服务：<a href="https://a.zhique.cn/home" target="_blank" rel="noreferrer">现有服务参考</a></li>
+<li>非 PPT 教学作品样例：<a href="https://61645698-1600-400a-946d-1a2d7727cf01.hwgz.zhique.cn/7fb9a3b5-23b1-4dc0-9d7e-936c30a26bea/index.html" target="_blank" rel="noreferrer">凸透镜成像规律互动课件</a></li>
+</ul>
+<p>样例中的页面导航、实验控件、动画、3D 或内置练习均属于教学作品本身。Teeko 学生端只读显示教师操作效果；只有教师通过 Teeko“本课题目”正式发布的题目，才允许学生提交、形成统计并进入课堂报告。</p>
+
+    </main>
+    <aside class="rail" aria-label="文档概览"><section class="rail-card"><h2>文档概览</h2><div class="stat"><span>章节</span><strong>22</strong></div><div class="stat"><span>流程图</span><strong>6</strong></div><div class="stat"><span>待确认</span><strong>172</strong></div><div class="stat"><span>更新日期</span><strong>2026-08-28</strong></div></section></aside>
+  </div>
+  <button class="backdrop" type="button" aria-label="关闭目录"></button>
+  <script>
+    const root = document.documentElement;
+    const themeButton = document.querySelector('.theme-button');
+    const setTheme = theme => { root.dataset.theme = theme; themeButton.textContent = theme === 'dark' ? '浅色' : '深色'; localStorage.setItem('teeko-prd-theme', theme); dispatchEvent(new CustomEvent('teeko-theme', { detail: theme })); };
+    setTheme(localStorage.getItem('teeko-prd-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+    themeButton.addEventListener('click', () => setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark'));
+    document.querySelector('.print-button').addEventListener('click', () => print());
+    const menuButton = document.querySelector('.menu-button');
+    const closeMenu = () => { document.body.classList.remove('menu-open'); menuButton.setAttribute('aria-expanded', 'false'); };
+    menuButton.addEventListener('click', () => { const open = document.body.classList.toggle('menu-open'); menuButton.setAttribute('aria-expanded', String(open)); });
+    document.querySelector('.backdrop').addEventListener('click', closeMenu);
+    document.querySelectorAll('.toc-link').forEach(link => link.addEventListener('click', closeMenu));
+
+    const searchInput = document.querySelector('.search-input');
+    const searchStatus = document.querySelector('.search-status');
+    const documentNode = document.querySelector('#document');
+    let searchHits = [];
+    let currentHit = -1;
+
+    const clearSearch = () => {
+      documentNode.querySelectorAll('mark.search-hit').forEach(mark => mark.replaceWith(document.createTextNode(mark.textContent)));
+      documentNode.normalize();
+      searchHits = [];
+      currentHit = -1;
+      searchStatus.textContent = '';
+    };
+
+    const goToHit = index => {
+      searchHits.forEach(hit => hit.classList.remove('current'));
+      currentHit = (index + searchHits.length) % searchHits.length;
+      const hit = searchHits[currentHit];
+      hit.classList.add('current');
+      hit.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      searchStatus.textContent = `${currentHit + 1} / ${searchHits.length}`;
+    };
+
+    const runSearch = () => {
+      clearSearch();
+      const query = searchInput.value.trim();
+      if (query.length < 2) return;
+      const needle = query.toLocaleLowerCase();
+      const walker = document.createTreeWalker(documentNode, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+          return node.parentElement?.closest('script, style, .mermaid, svg, mark.search-hit') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+        }
+      });
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      nodes.forEach(node => {
+        const value = node.nodeValue;
+        const lower = value.toLocaleLowerCase();
+        let start = 0;
+        let index = lower.indexOf(needle, start);
+        if (index < 0) return;
+        const fragment = document.createDocumentFragment();
+        while (index >= 0) {
+          fragment.append(value.slice(start, index));
+          const mark = document.createElement('mark');
+          mark.className = 'search-hit';
+          mark.textContent = value.slice(index, index + query.length);
+          fragment.append(mark);
+          start = index + query.length;
+          index = lower.indexOf(needle, start);
+        }
+        fragment.append(value.slice(start));
+        node.replaceWith(fragment);
+      });
+      searchHits = [...documentNode.querySelectorAll('mark.search-hit')];
+      searchStatus.textContent = searchHits.length ? `${searchHits.length} 处` : '无结果';
+      if (searchHits.length) goToHit(0);
+    };
+
+    searchInput.addEventListener('input', runSearch);
+    searchInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && searchHits.length) {
+        event.preventDefault();
+        goToHit(currentHit + (event.shiftKey ? -1 : 1));
+      }
+      if (event.key === 'Escape') {
+        searchInput.value = '';
+        clearSearch();
+        searchInput.blur();
+      }
+    });
+    addEventListener('keydown', event => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'f') {
+        event.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      }
+    });
+  </script>
+  <script type="module">
+    const figures = [...document.querySelectorAll('.mermaid-block')];
+    const diagrams = figures.map((figure, index) => { const node = figure.querySelector('.mermaid'); node.dataset.source = node.textContent.trim(); node.id = 'mermaid-diagram-' + (index + 1); return node; });
+    let mermaid;
+    const renderDiagrams = async theme => { if (!mermaid) return; mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: theme === 'dark' ? 'dark' : 'base', flowchart: { curve: 'basis', htmlLabels: true, useMaxWidth: true } }); for (const [index, node] of diagrams.entries()) { node.removeAttribute('data-processed'); node.textContent = node.dataset.source; figures[index].classList.remove('diagram-failed'); try { await mermaid.run({ nodes: [node] }); } catch { figures[index].classList.add('diagram-failed'); } } };
+    try { mermaid = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default; await renderDiagrams(root.dataset.theme); addEventListener('teeko-theme', event => renderDiagrams(event.detail)); } catch { figures.forEach(figure => figure.classList.add('diagram-failed')); }
+  </script>
+</body>
+</html>
