@@ -307,6 +307,8 @@
     studentLocalSelection: null,
     selectedQuestionIds: [],
     questionGeneration: null,
+    contentRevision: null,
+    contentRevisionTimer: null,
     guideOpen: false,
     workFilter: "all",
     workPage: 2
@@ -512,11 +514,17 @@
     return Boolean(work && state.works.some(item => item.id === work.id));
   }
 
+  function markWorkChanged(work) {
+    work.updatedAt = "剛剛";
+    if (isSavedWork(work)) work.pendingSave = true;
+  }
+
   function saveGeneratedDraft(workId) {
     if (state.works.some(work => work.id === workId)) return true;
     const draft = state.generation.draft;
     if (!draft || draft.id !== workId) return false;
     draft.updatedAt = "剛剛";
+    delete draft.pendingSave;
     state.works.unshift(draft);
     state.generation.draft = null;
     return true;
@@ -667,7 +675,6 @@
   function renderHome() {
     const latestReport = state.report;
     const prep = state.prep;
-    const draft = state.generation.draft;
     const content = `
       <section class="page">
         <section class="home-dialog" aria-labelledby="home-dialog-title">
@@ -686,7 +693,7 @@
               </div>` : ""}
             <div class="home-composer-footer">
               <div class="home-composer-tools">
-                ${button("＋ 上傳教案", "simulate-upload", "outline", 'class="btn btn-outline home-upload"')}
+                ${button("＋ 上傳教案（選填）", "simulate-upload", "outline", 'class="btn btn-outline home-upload"')}
                 <label class="sr-only" for="home-subject">學科，可選</label>
                 <select id="home-subject" class="home-filter" aria-label="學科，可選" data-prep-field="subject">
                   <option value="">學科：不指定</option>
@@ -704,8 +711,6 @@
           </div>
           ${ui.prepErrors.input ? `<span class="field-error home-dialog-error">${ui.prepErrors.input}</span>` : ""}
         </section>
-
-        ${draft ? `<div class="notice" style="margin-top:18px"><strong>有一份課件尚未儲存</strong><p style="margin:6px 0 12px">${escapeHTML(draft.title)} 仍是生成草稿，不會出現在我的作品。</p>${button("繼續編輯並儲存", "navigate", "primary", `data-route="/work/${draft.id}"`)}</div>` : ""}
 
         <div class="section-row">
           <h2>接著上次的工作</h2>
@@ -800,7 +805,7 @@
               <span class="field-hint">可以描述教學目標、重點、課堂長度、活動形式或學生程度。</span>
             </div>
             <div class="field">
-              <span class="field-label">上傳教案</span>
+              <span class="field-label">上傳教案 <span class="optional-label">可選</span></span>
               ${prep.file ? `
                 <div class="upload-zone has-file">
                   <div class="file-info"><span class="upload-symbol" style="margin:0">案</span><div><strong>${escapeHTML(prep.file.name)}</strong><span class="caption">已完成模擬解析 · ${escapeHTML(prep.file.size)}</span></div></div>
@@ -845,6 +850,7 @@
   }
 
   const generationStages = ["分析教學內容", "建立內容結構", "生成互動作品", "準備可編輯草稿", "生成配套題"];
+  const resourceGenerationStages = ["讀取平台資源", "複製作品內容", "建立未儲存草稿", "生成配套題", "準備進入編輯"];
 
   function ensureGenerationTimer() {
     if (state.generation.status !== "running" || ui.generationTimer) return;
@@ -884,7 +890,7 @@
           ui.workTab = "content";
           ui.workPage = 1;
           navigate(`/work/${state.generation.workId}`);
-          showToast("課件已生成，請確認後儲存到我的作品。 ");
+          showToast(state.generation.mode === "resource" ? "個人草稿與配套題已準備好，確認後請按「儲存課件」。 " : "課件已生成，確認後請按「儲存課件」。 ");
           return;
         }
       }
@@ -898,31 +904,35 @@
     const task = state.generation;
     const complete = task.status === "complete";
     const failed = task.status === "failed";
+    const resourceMode = task.mode === "resource";
+    const stages = resourceMode ? resourceGenerationStages : generationStages;
     const completedWork = complete ? workById(task.workId) : null;
     const completedSaved = isSavedWork(completedWork);
-    const title = complete ? "教學作品已準備好" : failed ? "這次生成未完成" : "正在把教學想法變成作品";
+    const title = complete ? resourceMode ? "個人草稿已準備好" : "教學作品已準備好" : failed ? resourceMode ? "資源草稿建立未完成" : "這次生成未完成" : resourceMode ? "正在建立可修改的個人草稿" : "正在把教學想法變成作品";
     const detail = complete
       ? completedSaved
         ? `課件與 ${completedWork?.questions.length || DEFAULT_QUESTION_COUNT} 道配套題已儲存到我的作品。`
-        : `課件草稿與 ${completedWork?.questions.length || DEFAULT_QUESTION_COUNT} 道配套題已生成，請進入編輯頁確認並儲存。`
+        : resourceMode
+          ? `個人草稿與 ${completedWork?.questions.length || DEFAULT_QUESTION_COUNT} 道配套題已建立，請進入編輯頁確認並儲存。`
+          : `課件草稿與 ${completedWork?.questions.length || DEFAULT_QUESTION_COUNT} 道配套題已生成，請進入編輯頁確認並儲存。`
       : failed
-        ? "已保留你的教學要求，你可以直接重試或返回修改。"
-        : generationStages[task.stage] || generationStages[0];
+        ? resourceMode ? "平台原資源未受影響，你可以直接重試或返回資源詳情。" : "已保留你的教學要求，你可以直接重試或返回修改。"
+        : stages[task.stage] || stages[0];
     const content = `
       <section class="page page-narrow">
         <div class="card generate-card accent-card">
           <div class="generate-orbit">${brandLockup({ compact: true }).replace(/<span>\s*<span class="brand-word">[\s\S]*?<\/span>\s*<\/span>$/, "")}</div>
-          <p class="eyebrow">AI 教學作品生成</p>
+          <p class="eyebrow">${resourceMode ? "平台資源使用並修改" : "AI 教學作品生成"}</p>
           <h1 class="home-display">${title}</h1>
           <p class="muted" style="margin-bottom:0;font-size:13px">${detail}</p>
           <div class="progress-track" aria-label="生成進度"><div class="progress-bar" style="width:${task.progress}%"></div></div>
           <strong style="color:#082f36;font-size:24px">${task.progress}%</strong>
           <div class="stage-list">
-            ${generationStages.map((stage, index) => `<div class="stage-item ${index < task.stage || complete ? "is-done" : index === task.stage ? "is-active" : ""}">${stage}</div>`).join("")}
+            ${stages.map((stage, index) => `<div class="stage-item ${index < task.stage || complete ? "is-done" : index === task.stage ? "is-active" : ""}">${stage}</div>`).join("")}
           </div>
-          <div class="status-message">${complete ? completedSaved ? "已加入我的作品，可繼續編輯或建立課堂。" : "目前仍是未儲存草稿，不會出現在我的作品；內容版本、托管連結、摘要及配套題已建立。" : failed ? "原作品沒有被修改或刪除。" : "你可以離開此頁，原型會在本機背景繼續模擬生成。"}</div>
+          <div class="status-message">${complete ? completedSaved ? "已加入我的作品，可繼續編輯或建立課堂。" : "目前仍是未儲存草稿，不會出現在我的作品；內容版本、托管連結、摘要及配套題已建立。" : failed ? resourceMode ? "平台原資源沒有被修改或刪除。" : "原作品沒有被修改或刪除。" : resourceMode ? "平台原資源不受影響。你可以離開此頁，草稿會在背景繼續建立。" : "你可以離開此頁，原型會在本機背景繼續模擬生成。"}</div>
           <div class="button-row" style="justify-content:center">
-            ${complete ? `${button("進入編輯", "view-generated-work", "primary", 'class="btn btn-primary btn-lg"')}${button("返回首頁", "navigate", "outline", 'data-route="/home"')}` : failed ? `${button("重試生成", "retry-generation", "primary")}${button("修改備課要求", "navigate", "outline", 'data-route="/prepare"')}` : `${button("返回首頁，背景繼續", "navigate", "outline", 'data-route="/home"')}${button("修改備課要求", "navigate", "ghost", 'data-route="/prepare"')}`}
+            ${complete ? `${button("進入編輯", "view-generated-work", "primary", 'class="btn btn-primary btn-lg"')}${button("返回首頁", "navigate", "outline", 'data-route="/home"')}` : failed ? resourceMode ? `${button("重試建立", "retry-generation", "primary")}${button("返回資源詳情", "navigate", "outline", `data-route="/resource/${task.resourceId}"`)}` : `${button("重試生成", "retry-generation", "primary")}${button("修改備課要求", "navigate", "outline", 'data-route="/prepare"')}` : resourceMode ? `${button("返回首頁，背景繼續", "navigate", "outline", 'data-route="/home"')}${button("返回資源詳情", "navigate", "ghost", `data-route="/resource/${task.resourceId}"`)}` : `${button("返回首頁，背景繼續", "navigate", "outline", 'data-route="/home"')}${button("修改備課要求", "navigate", "ghost", 'data-route="/prepare"')}`}
           </div>
         </div>
       </section>`;
@@ -930,6 +940,8 @@
   }
 
   function workCard(work) {
+    const pendingSave = Boolean(work.pendingSave);
+    const generatingQuestions = ui.questionGeneration?.workId === work.id;
     return `
       <article class="work-card" data-work-card="${work.id}">
         <div class="work-cover ${work.cover}">
@@ -937,12 +949,12 @@
           <strong>${escapeHTML(work.title)}</strong>
         </div>
         <div class="card-body">
-          <span class="badge badge-jade">已儲存</span>
+          <span class="badge ${pendingSave ? "badge-neutral" : "badge-jade"}">${pendingSave ? "有未儲存修改" : "已儲存"}</span>
           <h3>${escapeHTML(work.title)}</h3>
           <p>${escapeHTML(work.source)} · ${work.questions.length} 道配套題 · ${escapeHTML(work.updatedAt)}更新</p>
           <div class="card-actions">
             ${button("開啟編輯", "navigate", "secondary", `class="btn btn-secondary btn-sm" data-route="/work/${work.id}"`)}
-            ${button("建立課堂", "create-class", "outline", `class="btn btn-outline btn-sm" data-work-id="${work.id}"`)}
+            ${button("建立課堂", "create-class", "outline", `class="btn btn-outline btn-sm" data-work-id="${work.id}" ${pendingSave || generatingQuestions ? `disabled title="${generatingQuestions ? "請等待配套題生成" : "請先儲存修改"}"` : ""}`)}
             ${button("預覽", "open-work-preview", "ghost", `class="btn btn-ghost btn-sm" data-work-id="${work.id}"`)}
           </div>
         </div>
@@ -1027,7 +1039,10 @@
       });
     }
     const saved = isSavedWork(work);
+    const pendingSave = saved && Boolean(work.pendingSave);
     const generatingQuestions = ui.questionGeneration?.workId === work.id;
+    const canCreateClass = saved && !pendingSave && !generatingQuestions;
+    const contentRevision = ui.contentRevision?.workId === work.id ? ui.contentRevision : null;
     ui.workPage = Math.max(1, Math.min(work.pages, ui.workPage));
     const tab = ui.workTab;
     let tabContent = "";
@@ -1081,7 +1096,7 @@
     const content = `
       <section class="page page-wide">
         ${pageHead(saved ? "個人作品" : "未儲存草稿", work.title, `${work.type} · ${work.subject} · ${work.language}`, `${button(saved ? "返回作品庫" : "返回生成進度", "navigate", "ghost", `data-route="${saved ? "/works" : "/generate"}"`)}${button("預覽作品", "open-work-preview", "outline", `data-work-id="${work.id}"`)}`)}
-        ${saved ? "" : `<div class="notice" style="margin-bottom:18px"><strong>尚未加入我的作品</strong><br />你可以先預覽和修改內容；確認後請按「儲存到我的作品」。</div>`}
+        ${saved ? pendingSave ? `<div class="notice" style="margin-bottom:18px"><strong>有未儲存修改</strong><br />內容或配套題的調整已套用到編輯稿，請按「儲存修改」完成保存後再建立課堂。</div>` : "" : `<div class="notice" style="margin-bottom:18px"><strong>尚未加入我的作品</strong><br />你可以先預覽和修改內容；確認後請按「儲存課件」。</div>`}
         <div class="work-detail-grid">
           <div class="card detail-main">
             <div class="detail-toolbar">
@@ -1090,7 +1105,7 @@
                 <button type="button" role="tab" aria-selected="${tab === "questions"}" class="${tab === "questions" ? "is-active" : ""}" data-action="work-tab" data-tab="questions">配套題 ${work.questions.length}</button>
                 <button type="button" role="tab" aria-selected="${tab === "basic"}" class="${tab === "basic" ? "is-active" : ""}" data-action="work-tab" data-tab="basic">基本資料</button>
               </div>
-              <span class="badge ${saved ? "badge-jade" : "badge-neutral"}">${saved ? "已儲存" : "未儲存"}</span>
+              <span class="badge ${saved && !pendingSave ? "badge-jade" : "badge-neutral"}">${pendingSave ? "有未儲存修改" : saved ? "已儲存" : "未儲存"}</span>
             </div>
             ${tabContent}
           </div>
@@ -1099,23 +1114,23 @@
               <p class="eyebrow">主要操作</p>
               <h3>準備下一步</h3>
               <div class="button-row" style="display:grid">
-                ${saved ? "" : button(generatingQuestions ? "等待配套題生成" : "儲存到我的作品", "save-generated-work", "primary", `class="btn btn-primary btn-full" data-work-id="${work.id}" ${generatingQuestions ? 'disabled title="請等待配套題生成完成"' : ""}`)}
-                ${button("建立課堂", "create-class", saved ? "primary" : "outline", `class="btn btn-${saved ? "primary" : "outline"} btn-full" data-work-id="${work.id}" ${saved ? "" : 'disabled title="請先儲存到我的作品"'}`)}
-                ${button("編輯作品資料", "open-content-editor", "secondary", `class="btn btn-secondary btn-full" data-work-id="${work.id}"`)}
+                ${saved ? pendingSave ? button(generatingQuestions ? "等待配套題生成" : "儲存修改", "save-work-changes", "primary", `class="btn btn-primary btn-full" data-work-id="${work.id}" ${generatingQuestions ? 'disabled title="請等待配套題生成完成"' : ""}`) : "" : button(generatingQuestions ? "等待配套題生成" : "儲存課件", "save-generated-work", "primary", `class="btn btn-primary btn-full" data-work-id="${work.id}" ${generatingQuestions ? 'disabled title="請等待配套題生成完成"' : ""}`)}
+                ${button("建立課堂", "create-class", canCreateClass ? "primary" : "outline", `class="btn btn-${canCreateClass ? "primary" : "outline"} btn-full" data-work-id="${work.id}" ${canCreateClass ? "" : `disabled title="${generatingQuestions ? "請等待配套題生成" : pendingSave ? "請先儲存修改" : "請先儲存課件"}"`}`)}
+                ${button(contentRevision?.status === "running" ? "修改生成中…" : contentRevision?.status === "ready" ? "查看修改結果" : contentRevision?.candidate ? "繼續修改候選版本" : "修改教學內容", "open-content-editor", "secondary", `class="btn btn-secondary btn-full" data-work-id="${work.id}"`)}
                 ${button("開啟原互動作品", "open-original-work", "ghost", `class="btn btn-ghost btn-full" data-work-id="${work.id}"`)}
               </div>
             </section>
             <section class="card info-card">
               <h3>作品狀態</h3>
               <div class="info-list">
-                <div class="info-row"><span>儲存狀態</span><strong>${saved ? "已加入我的作品" : "待教師確認"}</strong></div>
+                <div class="info-row"><span>儲存狀態</span><strong>${pendingSave ? "有未儲存修改" : saved ? "已加入我的作品" : "待教師確認"}</strong></div>
                 <div class="info-row"><span>內容版本</span><strong>${escapeHTML(work.versionId || "生成草稿")}</strong></div>
                 <div class="info-row"><span>配套題</span><strong>${work.questions.length} 道</strong></div>
                 <div class="info-row"><span>學生端</span><strong>支援只讀同步</strong></div>
                 <div class="info-row"><span>原作品連結</span><strong>可存取</strong></div>
               </div>
             </section>
-            <div class="prototype-note">${saved ? "這是非 PPT 作品，因此配套題只關聯整份作品，不會顯示頁面關聯。" : "草稿修改會暫存在目前生成任務中，只有教師主動儲存後才會加入我的作品。"}</div>
+            <div class="prototype-note">${pendingSave ? "修改已保留在編輯稿中；儲存成功後才可用最新內容建立新課堂。" : saved ? "這是非 PPT 作品，因此配套題只關聯整份作品，不會顯示頁面關聯。" : "草稿修改會暫存在目前生成任務中，只有教師主動儲存後才會加入我的作品。"}</div>
           </aside>
         </div>
       </section>`;
@@ -1862,9 +1877,10 @@
     const work = workById(drawer.workId);
     const existing = work.questions.find(question => question.id === drawer.questionId);
     const question = existing || { type: "單選題", text: "", options: ["", "", "", ""], answer: [0], explanation: "" };
-    return drawerShell({
+    return modalShell({
       title: existing ? "編輯配套題" : "新增配套題",
       description: "只支援單選題、多選題及判斷題。非 PPT 作品不會關聯特定頁面。",
+      large: true,
       body: `
         <div class="field">
           <label class="field-label" for="question-type">題型</label>
@@ -1893,7 +1909,7 @@
           <label class="field-label" for="question-explanation">答案解析</label>
           <textarea id="question-explanation" class="textarea" data-editor-field="explanation" style="min-height:90px">${escapeHTML(question.explanation)}</textarea>
         </div>`,
-      footer: `${button("取消", "close-layer", "ghost")}${button("儲存題目", "save-question", "primary", `data-work-id="${work.id}" data-question-id="${existing?.id || ""}"`)}`
+      footer: `${button("取消", "close-layer", "ghost")}${button("套用題目修改", "save-question", "primary", `data-work-id="${work.id}" data-question-id="${existing?.id || ""}"`)}`
     });
   }
 
@@ -1905,15 +1921,50 @@
 
     if (ui.drawer?.type === "content-editor") {
       const work = workById(ui.drawer.workId);
-      const saved = isSavedWork(work);
-      return drawerShell({
-        title: "編輯作品資料",
-        description: saved ? "正式內容編輯會由現有教學作品生成服務提供。這裡示範可儲存的基本修改。" : "先調整草稿資料，再由你決定是否加入我的作品。",
+      const revision = ui.contentRevision?.workId === work.id ? ui.contentRevision : { status: "editing" };
+      if (revision.status === "running") {
+        return modalShell({
+          title: "正在生成修改版本",
+          description: "修改要求已提交至知雀，Teeko 正在等待新的不可變版本、託管連結及內容摘要。",
+          large: true,
+          body: `${revision.candidate ? `<div class="info-row" style="margin-bottom:16px"><span>本輪基於</span><strong>${escapeHTML(revision.candidate.versionId)}</strong></div>` : ""}<div class="notice"><strong>修改要求</strong><br />${escapeHTML(revision.request)}</div><div class="prototype-note">你可以先關閉此視窗，生成會在背景繼續。已儲存版本在套用候選並儲存修改前不會改變。</div>`,
+          footer: button("關閉", "close-layer", "ghost")
+        });
+      }
+      if (revision.status === "ready") {
+        const previewPage = Math.max(1, Math.min(work.pages, ui.drawer.page || 1));
+        const previewWork = { ...work, ...revision.candidate };
+        return modalShell({
+          title: "確認修改結果",
+          description: "知雀已返回候選版本，修改結果預覽如下。",
+          large: true,
+          body: `
+            <div class="info-list">
+              <div class="info-row"><span>目前版本</span><strong>${escapeHTML(work.versionId)}</strong></div>
+              <div class="info-row"><span>候選版本</span><strong>${escapeHTML(revision.candidate.versionId)}</strong></div>
+              <div class="info-row"><span>修改要求</span><strong>${escapeHTML(revision.request)}</strong></div>
+              <div class="info-row"><span>內容摘要</span><strong>${escapeHTML(revision.candidate.summary)}</strong></div>
+            </div>
+            <div class="lesson-stage" style="min-height:220px;padding:12px;margin-top:16px">${lessonCanvas(previewPage, { work: previewWork })}</div>
+            <div class="lesson-stage-controls">
+              ${button("上一頁", "revision-page", "outline", 'class="btn btn-outline btn-sm" data-direction="prev"')}
+              <span class="page-counter">${previewPage} / ${work.pages}</span>
+              ${button("下一頁", "revision-page", "outline", 'class="btn btn-outline btn-sm" data-direction="next"')}
+            </div>
+            <div class="notice">套用後會成為作品的未儲存修改；返回作品頁按「儲存修改」才完成保存。配套題不會自動更新，已凍結的課堂也不受影響。</div>`,
+          footer: `${button("放棄修改", "discard-work-revision", "ghost")}${button("繼續修改", "continue-work-revision", "outline", `data-work-id="${work.id}"`)}${button("套用新版本", "confirm-work-revision", "primary", `data-work-id="${work.id}"`)}`
+        });
+      }
+      const refining = Boolean(revision.candidate);
+      return modalShell({
+        title: refining ? "繼續修改候選版本" : "修改教學內容",
+        description: refining ? "輸入下一輪修改要求，知雀會以目前候選版本繼續生成。" : "輸入修改要求後提交至知雀。返回的新版本需要先預覽和套用，再回到作品頁儲存修改。",
+        large: true,
         body: `
-          <div class="field"><label class="field-label" for="edit-work-title">作品名稱</label><input id="edit-work-title" class="input" value="${escapeHTML(work.title)}" /></div>
-          <div class="field"><label class="field-label" for="edit-work-note">修改要求</label><textarea id="edit-work-note" class="textarea">補充一個生活應用例子，並縮短概念說明。</textarea></div>
-          <div class="notice">${saved ? "儲存後會形成新的個人版本。已開始或已結束的課堂仍引用原本的凍結快照。" : "確認儲存後，這份草稿才會加入我的作品。"}</div>`,
-        footer: `${button("取消", "close-layer", "ghost")}${button(saved ? "儲存新版本" : "儲存到我的作品", "save-work-content", "primary", `data-work-id="${work.id}"`)}`
+          ${refining ? `<div class="info-row" style="margin-bottom:16px"><span>修改基底</span><strong>${escapeHTML(revision.candidate.versionId)}</strong></div>` : ""}
+          <div class="field"><label class="field-label" for="edit-work-note">${refining ? "下一輪修改要求" : "修改要求"}</label><textarea id="edit-work-note" class="textarea" placeholder="例如：補充一個生活應用例子，並縮短概念說明。"></textarea><span class="field-hint">請說明需要增加、刪除或調整的內容。</span></div>
+          <div class="notice">${refining ? "本輪會繼續修改候選版本；個人作品已儲存版本仍保持不變。" : "提交修改不等於保存新版本。候選結果套用後，仍需在作品頁儲存修改。"}</div>`,
+        footer: `${refining ? button("返回修改結果", "return-work-revision", "ghost", `data-work-id="${work.id}"`) : button("取消", "close-layer", "ghost")}${button(refining ? "提交繼續修改" : "提交修改", "submit-work-revision", "primary", `data-work-id="${work.id}"`)}`
       });
     }
 
@@ -1966,8 +2017,8 @@
     if (ui.modal?.type === "confirm-delete-question") {
       return modalShell({
         title: "刪除這道題？",
-        description: "刪除後會立即更新個人作品的配套題列表。",
-        body: `<div class="notice" style="border-color:#eccfc8;background:#fff7f5;color:#9b4237">這個操作只影響目前個人作品，不會改變已凍結的歷史課堂。</div>`,
+        description: "刪除後會更新目前編輯稿的配套題列表。",
+        body: `<div class="notice" style="border-color:#eccfc8;background:#fff7f5;color:#9b4237">刪除後仍需在作品頁儲存修改；已凍結的歷史課堂不受影響。</div>`,
         footer: `${button("取消", "close-layer", "ghost")}${button("確認刪除", "delete-question", "danger", `data-work-id="${ui.modal.workId}" data-question-id="${ui.modal.questionId}"`)}`
       });
     }
@@ -1976,7 +2027,7 @@
       return modalShell({
         title: "重新生成 6 道題？",
         description: "AI 會以目前作品內容重新建立一組配套題。",
-        body: `<div class="notice" style="border-color:#eccfc8;background:#fff7f5;color:#9b4237">目前的 ${workById(ui.modal.workId).questions.length} 道題會被新的 6 道題取代。已凍結的課堂不受影響。</div>`,
+        body: `<div class="notice" style="border-color:#eccfc8;background:#fff7f5;color:#9b4237">目前的 ${workById(ui.modal.workId).questions.length} 道題會在編輯稿中被新的 6 道題取代，完成後仍需儲存修改。已凍結的課堂不受影響。</div>`,
         footer: `${button("取消", "close-layer", "ghost")}${button("取代並生成", "regenerate-questions", "danger", `data-work-id="${ui.modal.workId}"`)}`
       });
     }
@@ -2195,7 +2246,15 @@
   function initializeClassroom(workId) {
     const work = workById(workId);
     if (!isSavedWork(work)) {
-      showToast("請先把課件儲存到我的作品，再建立課堂。 ");
+      showToast("請先儲存課件，再建立課堂。 ");
+      return;
+    }
+    if (work.pendingSave) {
+      showToast("請先儲存作品修改，再建立課堂。 ");
+      return;
+    }
+    if (ui.questionGeneration?.workId === work.id) {
+      showToast("請等待配套題生成完成並儲存修改，再建立課堂。 ");
       return;
     }
     state.classroom = {
@@ -2395,7 +2454,7 @@
 
     if (action === "retry-generation") {
       state.generation.status = "running";
-      state.generation.progress = 5;
+      state.generation.progress = state.generation.mode === "resource" ? 6 : 5;
       state.generation.stage = 0;
       persist();
       render();
@@ -2450,7 +2509,13 @@
     }
 
     if (action === "open-content-editor") {
-      ui.drawer = { type: "content-editor", workId: element.dataset.workId };
+      const workId = element.dataset.workId;
+      if (ui.contentRevision?.workId !== workId && (ui.contentRevision?.status === "running" || ui.contentRevision?.candidate)) {
+        showToast("請先處理另一份作品尚未完成的修改。 ");
+        return;
+      }
+      if (!ui.contentRevision || ui.contentRevision.workId !== workId) ui.contentRevision = { workId, status: "editing" };
+      ui.drawer = { type: "content-editor", workId };
       render();
       return;
     }
@@ -2489,25 +2554,105 @@
       return;
     }
 
-    if (action === "save-work-content") {
+    if (action === "save-work-changes") {
       const work = workById(element.dataset.workId);
-      const wasSaved = isSavedWork(work);
-      if (!work) return;
-      if (!wasSaved && ui.questionGeneration?.workId === work.id) {
+      if (!isSavedWork(work) || !work.pendingSave) return;
+      if (ui.questionGeneration?.workId === work.id) {
         showToast("請等待配套題生成完成後再儲存。 ");
         return;
       }
-      const title = document.querySelector("#edit-work-title")?.value.trim();
-      if (title) work.title = title;
+      delete work.pendingSave;
       work.updatedAt = "剛剛";
-      if (!wasSaved && !saveGeneratedDraft(work.id)) {
-        showToast("未能找到要儲存的課件草稿。 ");
+      persist();
+      render();
+      showToast("課件修改已儲存。 ");
+      return;
+    }
+
+    if (action === "submit-work-revision") {
+      const workId = element.dataset.workId;
+      const work = workById(workId);
+      const request = document.querySelector("#edit-work-note")?.value.trim();
+      if (!work || !request) {
+        showToast("請先輸入修改要求。 ");
         return;
       }
+      const baseCandidate = ui.contentRevision?.workId === workId ? ui.contentRevision.candidate : null;
+      ui.contentRevision = { workId, status: "running", request, ...(baseCandidate ? { candidate: baseCandidate } : {}) };
+      render();
+      showToast(baseCandidate ? "繼續修改要求已提交至知雀。 " : "修改要求已提交至知雀。 ");
+      window.clearTimeout(ui.contentRevisionTimer);
+      ui.contentRevisionTimer = window.setTimeout(() => {
+        const currentWork = workById(workId);
+        const activeRevision = ui.contentRevision;
+        if (!currentWork || activeRevision?.workId !== workId || activeRevision.status !== "running") return;
+        const baseWork = activeRevision.candidate || currentWork;
+        const versionId = `ver-${workId}-${String(Date.now()).slice(-6)}`;
+        const separator = baseWork.hostedUrl.includes("?") ? "&" : "?";
+        ui.contentRevision = {
+          workId,
+          status: "ready",
+          request: activeRevision.request,
+          candidate: {
+            versionId,
+            hostedUrl: `${baseWork.hostedUrl}${separator}version=${encodeURIComponent(versionId)}`,
+            summary: `${baseWork.summary} 本版本已按教師要求調整：${activeRevision.request}`
+          }
+        };
+        ui.contentRevisionTimer = null;
+        render();
+        showToast("知雀已返回修改版本，可繼續修改或套用新版本。 ");
+      }, 900);
+      return;
+    }
+
+    if (action === "continue-work-revision") {
+      const revision = ui.contentRevision;
+      if (!revision?.candidate || revision.status !== "ready") return;
+      ui.contentRevision = { ...revision, status: "editing" };
+      render();
+      return;
+    }
+
+    if (action === "return-work-revision") {
+      const revision = ui.contentRevision;
+      if (!revision?.candidate) return;
+      ui.contentRevision = { ...revision, status: "ready" };
+      render();
+      return;
+    }
+
+    if (action === "revision-page") {
+      const work = workById(ui.drawer?.workId);
+      if (!work || ui.contentRevision?.status !== "ready") return;
+      ui.drawer.page = Math.max(1, Math.min(work.pages, (ui.drawer.page || 1) + (element.dataset.direction === "next" ? 1 : -1)));
+      render();
+      return;
+    }
+
+    if (action === "discard-work-revision") {
+      ui.contentRevision = null;
+      ui.drawer = null;
+      render();
+      showToast("已放棄修改，原版本沒有改變。 ");
+      return;
+    }
+
+    if (action === "confirm-work-revision") {
+      const work = workById(element.dataset.workId);
+      const revision = ui.contentRevision;
+      if (!work || !revision || revision.workId !== work.id || revision.status !== "ready") return;
+      work.versionId = revision.candidate.versionId;
+      work.hostedUrl = revision.candidate.hostedUrl;
+      work.summary = revision.candidate.summary;
+      const saved = isSavedWork(work);
+      markWorkChanged(work);
+      ui.contentRevision = null;
+      ui.modal = null;
       ui.drawer = null;
       persist();
       render();
-      showToast(wasSaved ? "新個人版本已儲存。 " : "課件與配套題已儲存到我的作品。 ");
+      showToast(saved ? "新版本已套用，請儲存修改。 " : "已套用修改版本，作品仍是未儲存草稿。 ");
       return;
     }
 
@@ -2555,11 +2700,11 @@
         }
         work.questions.push({ id: `q-${Date.now()}`, type, text, options, answer: normalizedAnswer, explanation });
       }
-      work.updatedAt = "剛剛";
+      markWorkChanged(work);
       ui.drawer = null;
       persist();
       render();
-      showToast(isSavedWork(work) ? "配套題已儲存。 " : "配套題修改已保留在草稿，尚未加入我的作品。 ");
+      showToast(isSavedWork(work) ? "配套題修改已套用，請儲存修改。 " : "配套題修改已保留在草稿，尚未加入我的作品。 ");
       return;
     }
 
@@ -2573,10 +2718,11 @@
     if (action === "delete-question") {
       const work = workById(element.dataset.workId);
       work.questions = work.questions.filter(question => question.id !== element.dataset.questionId);
+      markWorkChanged(work);
       ui.modal = null;
       persist();
       render();
-      showToast("題目已刪除。 ");
+      showToast(isSavedWork(work) ? "題目已刪除，請儲存修改。 " : "題目已從草稿刪除。 ");
       return;
     }
 
@@ -2596,11 +2742,11 @@
       showToast("正在重新生成 6 道配套題... ");
       window.setTimeout(() => {
         work.questions = questionBatchFor(work);
-        work.updatedAt = "剛剛";
+        markWorkChanged(work);
         ui.questionGeneration = null;
         persist();
         render();
-        showToast("已用新的 6 道題取代原配套題。 ");
+        showToast(isSavedWork(work) ? "已套用新的 6 道題，請儲存修改。 " : "已用新的 6 道題取代草稿配套題。 ");
       }, 780);
       return;
     }
@@ -2623,11 +2769,11 @@
           return;
         }
         work.questions.push(...questionBatchFor(work));
-        work.updatedAt = "剛剛";
+        markWorkChanged(work);
         ui.questionGeneration = null;
         persist();
         render();
-        showToast(`已追加 6 道題，目前共 ${work.questions.length} 道。 `);
+        showToast(isSavedWork(work) ? `已追加 6 道題，目前共 ${work.questions.length} 道；請儲存修改。 ` : `已追加 6 道題，目前草稿共 ${work.questions.length} 道。 `);
       }, 780);
       return;
     }
@@ -2691,8 +2837,13 @@
 
     if (action === "create-class") {
       const workId = element.dataset.workId || "w1";
-      if (!isSavedWork(workById(workId))) {
-        showToast("請先把課件儲存到我的作品，再建立課堂。 ");
+      const work = workById(workId);
+      if (!isSavedWork(work)) {
+        showToast("請先儲存課件，再建立課堂。 ");
+        return;
+      }
+      if (work.pendingSave) {
+        showToast("請先儲存作品修改，再建立課堂。 ");
         return;
       }
       if (state.classroom.status === "live") {
@@ -3159,6 +3310,7 @@
 
     if (action === "reset-demo") {
       [ui.generationTimer, ui.reportTimer].filter(Boolean).forEach(timer => window.clearInterval(timer));
+      if (ui.contentRevisionTimer) window.clearTimeout(ui.contentRevisionTimer);
       state = clone(defaultState);
       localStorage.removeItem(STORAGE_KEY);
       persist();
@@ -3168,6 +3320,8 @@
       ui.workPage = 2;
       ui.generationTimer = null;
       ui.reportTimer = null;
+      ui.contentRevision = null;
+      ui.contentRevisionTimer = null;
       navigate("/signin");
       showToast("所有示範資料已重設。 ");
       return;

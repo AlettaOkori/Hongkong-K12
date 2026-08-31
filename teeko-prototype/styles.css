@@ -3340,6 +3340,7 @@ select:focus-visible,
 
 .drawer-foot {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 10px;
   padding: 16px 23px;

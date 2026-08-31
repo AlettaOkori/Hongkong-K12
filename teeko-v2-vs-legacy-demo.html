@@ -1,0 +1,1842 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Teeko V2.0 与旧项目的业务流程、功能保留、调整、废弃及新增差异说明。">
+  <title>Teeko V2.0 与旧项目差异说明</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #edf2ef;
+      --surface: #f9fbfa;
+      --surface-raised: #ffffff;
+      --surface-muted: #e7eeea;
+      --text: #17231f;
+      --muted: #5a6963;
+      --line: #ccd8d2;
+      --accent: #0b725f;
+      --accent-strong: #075b4b;
+      --accent-soft: #d9eee7;
+      --old: #8b4a3a;
+      --old-soft: #f5e4df;
+      --new: #0b725f;
+      --new-soft: #d9eee7;
+      --warning: #8b6105;
+      --warning-soft: #f7edcf;
+      --danger: #a13b3b;
+      --danger-soft: #f7e1e1;
+      --info: #315f8f;
+      --info-soft: #e0eaf4;
+      --code: #14201c;
+      --code-text: #dce8e3;
+      --radius: 14px;
+      --shadow: 0 18px 56px rgb(30 62 51 / 9%);
+      font-family: "SF Pro Text", "PingFang TC", "PingFang SC", "Microsoft JhengHei", system-ui, sans-serif;
+      font-synthesis: none;
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0e1512;
+      --surface: #151d19;
+      --surface-raised: #1a231f;
+      --surface-muted: #202b26;
+      --text: #e7efeb;
+      --muted: #a7b4ae;
+      --line: #34443c;
+      --accent: #58c6aa;
+      --accent-strong: #8bdac7;
+      --accent-soft: #123b31;
+      --old: #e5a18f;
+      --old-soft: #452921;
+      --new: #8bdac7;
+      --new-soft: #123b31;
+      --warning: #f1c56c;
+      --warning-soft: #423416;
+      --danger: #ef9b9b;
+      --danger-soft: #452424;
+      --info: #9ec4e9;
+      --info-soft: #1d344b;
+      --code: #0a100d;
+      --code-text: #dce8e3;
+      --shadow: 0 18px 56px rgb(0 0 0 / 28%);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 92px; }
+    body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.72; }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    a { color: var(--accent-strong); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    a:hover { text-decoration-thickness: 2px; }
+    :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+    .skip-link { position: fixed; z-index: 100; left: 16px; top: -80px; padding: 10px 14px; border-radius: 9px; background: var(--accent); color: #071b15; font-weight: 800; }
+    .skip-link:focus { top: 12px; }
+    .topbar { position: sticky; top: 0; z-index: 30; min-height: 68px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 91%, transparent); backdrop-filter: blur(16px); }
+    .topbar-inner { width: min(1480px, 100%); min-height: 68px; margin: auto; padding: 10px 24px; display: flex; align-items: center; gap: 12px; }
+    .brand { display: flex; align-items: baseline; gap: 10px; min-width: 280px; font-weight: 800; letter-spacing: -.02em; }
+    .brand small { color: var(--muted); font-size: 12px; font-weight: 650; letter-spacing: 0; }
+    .top-summary { flex: 1; color: var(--muted); font-size: 13px; text-align: center; }
+    .actions { margin-left: auto; display: flex; gap: 8px; }
+    .action-button { min-width: 64px; height: 40px; padding: 0 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-raised); cursor: pointer; }
+    .action-button:hover { border-color: var(--accent); color: var(--accent-strong); }
+    .action-button:active { transform: translateY(1px); }
+    .menu-button { display: none; }
+    .layout { width: min(1480px, 100%); margin: 0 auto; padding: 38px 24px 90px; display: grid; grid-template-columns: 260px minmax(0, 900px) 200px; gap: 36px; align-items: start; }
+    .sidebar { position: sticky; top: 94px; max-height: calc(100dvh - 118px); overflow: auto; scrollbar-width: thin; }
+    .sidebar-title { margin: 0 0 11px; color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .toc { display: grid; gap: 2px; }
+    .toc-link { display: block; padding: 7px 10px; border-left: 2px solid transparent; border-radius: 0 8px 8px 0; color: var(--muted); font-size: 13px; line-height: 1.35; text-decoration: none; }
+    .toc-link.level-3 { padding-left: 22px; font-size: 12px; }
+    .toc-link:hover { background: var(--surface-muted); color: var(--text); }
+    .toc-link.active { border-left-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong); font-weight: 760; }
+    .document { min-width: 0; padding: 0 54px 70px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); }
+    .document-hero { margin: 0 -54px 48px; padding: 58px 54px 50px; border-bottom: 1px solid var(--line); border-radius: var(--radius) var(--radius) 0 0; background: linear-gradient(132deg, var(--accent-soft), transparent 72%); }
+    .hero-label { margin: 0 0 14px; color: var(--accent-strong); font-size: 12px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+    h1 { max-width: 16ch; margin: 0; font-size: clamp(38px, 5vw, 60px); line-height: 1.04; letter-spacing: -.052em; }
+    .lede { max-width: 650px; margin: 20px 0 0; color: var(--muted); font-size: 18px; }
+    .model-shift { margin-top: 32px; display: grid; grid-template-columns: minmax(0, 1fr) 38px minmax(0, 1fr); align-items: stretch; gap: 10px; }
+    .model { padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--surface-raised) 88%, transparent); }
+    .model strong { display: block; margin-bottom: 5px; font-size: 13px; }
+    .model.old strong { color: var(--old); }
+    .model.new strong { color: var(--new); }
+    .model span { color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .shift-arrow { align-self: center; color: var(--accent); font-size: 24px; font-weight: 800; text-align: center; }
+    h2, h3, h4 { position: relative; color: var(--text); text-wrap: balance; }
+    h2 { margin: 72px 0 22px; padding-top: 5px; font-size: 30px; line-height: 1.25; letter-spacing: -.034em; }
+    h2::before { content: ""; display: block; width: 42px; height: 4px; margin-bottom: 15px; border-radius: 3px; background: var(--accent); }
+    h3 { margin: 44px 0 15px; font-size: 21px; line-height: 1.35; letter-spacing: -.018em; }
+    h4 { margin: 30px 0 10px; font-size: 16px; line-height: 1.4; }
+    .heading-anchor { margin-left: 8px; color: var(--muted); opacity: 0; font-size: .7em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor, h4:hover .heading-anchor, .heading-anchor:focus-visible { opacity: 1; }
+    p { margin: 12px 0; font-size: 15px; }
+    strong { font-weight: 780; }
+    ul, ol { margin: 14px 0 22px; padding-left: 1.35em; }
+    li { margin: 7px 0; padding-left: .28em; }
+    li::marker { color: var(--accent); font-weight: 800; }
+    hr { margin: 62px 0; border: 0; border-top: 1px solid var(--line); }
+    blockquote { margin: 24px 0; padding: 16px 18px; border-left: 4px solid var(--accent); border-radius: 0 12px 12px 0; background: var(--accent-soft); }
+    code { padding: .12em .38em; border-radius: 5px; background: var(--surface-muted); font-family: "SFMono-Regular", Consolas, monospace; font-size: .88em; }
+    .table-wrap { margin: 20px 0 30px; overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-raised); scrollbar-width: thin; }
+    table { width: 100%; min-width: 700px; border-collapse: collapse; font-size: 13px; line-height: 1.55; }
+    th, td { padding: 12px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+    th { position: sticky; top: 0; background: var(--surface-muted); color: var(--text); font-weight: 780; }
+    td:first-child, th:first-child { min-width: 118px; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: color-mix(in srgb, var(--accent-soft) 42%, transparent); }
+    .meta-table { margin-top: -12px; }
+    .meta-table table { min-width: 560px; }
+    .meta-table td:first-child { width: 130px; color: var(--muted); font-weight: 700; }
+    .status { display: inline-block; padding: 2px 8px; border-radius: 999px; white-space: nowrap; font-size: 12px; font-weight: 780; }
+    .status-keep { background: var(--new-soft); color: var(--new); }
+    .status-adjust { background: var(--info-soft); color: var(--info); }
+    .status-remove { background: var(--danger-soft); color: var(--danger); }
+    .status-new { background: var(--warning-soft); color: var(--warning); }
+    .status-pending { outline: 1px dashed currentColor; color: var(--warning); }
+    .code-block { margin: 22px 0 32px; overflow: hidden; border: 1px solid #34443c; border-radius: var(--radius); background: var(--code); }
+    .code-block figcaption { padding: 10px 15px; border-bottom: 1px solid #34443c; color: #a5b7af; font-size: 12px; font-weight: 700; }
+    .code-block pre { margin: 0; padding: 20px; overflow: auto; color: var(--code-text); line-height: 1.7; }
+    .code-block pre code { padding: 0; background: transparent; color: inherit; font-size: 12px; }
+    .diagram-card { margin: 24px 0 42px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-raised); box-shadow: 0 12px 34px rgb(30 62 51 / 7%); }
+    .diagram-card figcaption { display: flex; justify-content: space-between; gap: 16px; padding: 13px 16px; border-bottom: 1px solid var(--line); background: var(--surface-muted); font-size: 13px; font-weight: 780; }
+    .diagram-note { color: var(--muted); font-size: 12px; font-weight: 620; }
+    .mermaid { min-height: 260px; padding: 30px 24px; overflow: auto; color: var(--muted); white-space: pre; font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; line-height: 1.65; }
+    .mermaid[data-processed="true"] { display: flex; justify-content: center; min-width: 0; color: inherit; white-space: normal; font-family: inherit; }
+    .mermaid svg { display: block; width: auto; min-width: 760px; max-width: none; height: auto; }
+    .diagram-card.failed figcaption::after { content: "图表加载失败，已显示完整 Mermaid 源码"; color: var(--danger); font-size: 12px; }
+    .rail { position: sticky; top: 94px; display: grid; gap: 14px; }
+    .rail-card { padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+    .rail-card h2 { margin: 0 0 12px; padding: 0; font-size: 13px; letter-spacing: 0; }
+    .rail-card h2::before { display: none; }
+    .legend-list { display: grid; gap: 9px; }
+    .legend-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 12px; }
+    .rail-note { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .backdrop { display: none; }
+    @media (max-width: 1220px) {
+      .layout { grid-template-columns: 248px minmax(0, 1fr); gap: 28px; }
+      .rail { display: none; }
+      .top-summary { display: none; }
+    }
+    @media (max-width: 860px) {
+      html { scroll-padding-top: 78px; }
+      .topbar-inner { min-height: 62px; padding: 9px 14px; }
+      .brand { min-width: 0; }
+      .brand small, .print-button { display: none; }
+      .menu-button { display: inline-block; }
+      .layout { display: block; padding: 18px 12px 64px; }
+      .sidebar { position: fixed; z-index: 50; inset: 0 auto 0 0; width: min(86vw, 330px); max-height: none; padding: 26px 20px; background: var(--surface-raised); transform: translateX(-105%); transition: transform .2s ease; box-shadow: var(--shadow); }
+      body.menu-open .sidebar { transform: translateX(0); }
+      .backdrop { position: fixed; z-index: 40; inset: 0; background: rgb(7 15 12 / 55%); }
+      body.menu-open .backdrop { display: block; }
+      .document { padding: 0 20px 46px; }
+      .document-hero { margin: 0 -20px 42px; padding: 42px 20px 38px; }
+      h1 { font-size: 40px; }
+      .lede { font-size: 16px; }
+      .model-shift { grid-template-columns: 1fr; }
+      .shift-arrow { transform: rotate(90deg); }
+      h2 { margin-top: 58px; font-size: 26px; }
+      h3 { margin-top: 38px; }
+      .heading-anchor { opacity: .55; }
+      .diagram-card figcaption { display: block; }
+      .diagram-note { display: block; margin-top: 3px; }
+    }
+    @media (max-width: 520px) {
+      .brand { font-size: 14px; }
+      .actions { gap: 5px; }
+      .action-button { min-width: 52px; padding: 0 9px; font-size: 12px; }
+      h1 { font-size: 34px; }
+      .document { border-radius: 10px; }
+      .mermaid { padding: 22px 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; }
+    }
+    @media print {
+      :root { color-scheme: light; --bg: #fff; --surface: #fff; --surface-raised: #fff; --surface-muted: #f0f3f1; --text: #111; --muted: #444; --line: #c8ceca; --accent: #0b725f; --accent-strong: #075b4b; --accent-soft: #e5f2ed; }
+      .topbar, .sidebar, .rail, .backdrop, .heading-anchor { display: none !important; }
+      body { background: #fff; font-size: 10pt; }
+      .layout { display: block; max-width: none; padding: 0; }
+      .document { padding: 0; border: 0; box-shadow: none; }
+      .document-hero { margin: 0 0 34px; padding: 30px 0; border-radius: 0; }
+      h1 { font-size: 32pt; }
+      h2 { break-before: page; margin-top: 0; padding-top: 20px; }
+      h2:first-of-type { break-before: auto; }
+      h3, h4 { break-after: avoid; }
+      p, li, tr, blockquote, figure { break-inside: avoid; }
+      .table-wrap { overflow: visible; }
+      table { min-width: 0; font-size: 8pt; }
+      .diagram-card { break-inside: auto; }
+      .mermaid { overflow: visible; padding: 14px 0; }
+      .mermaid svg { width: 100%; min-width: 0; max-width: 100%; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#document">跳到正文</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <button class="action-button menu-button" type="button" aria-expanded="false" aria-controls="sidebar">目录</button>
+      <div class="brand">Teeko <small>版本差异说明</small></div>
+      <div class="top-summary">从学校治理型产品迁移到教师个人教学闭环</div>
+      <div class="actions">
+        <button class="action-button theme-button" type="button" aria-label="切换深浅色">深色</button>
+        <button class="action-button print-button" type="button">打印</button>
+      </div>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" aria-label="文档目录">
+      <p class="sidebar-title">目录</p>
+      <nav class="toc"><a class="toc-link level-2" href="#0-阅读说明" data-target="0-阅读说明">0. 阅读说明</a>
+<a class="toc-link level-2" href="#1-一页结论" data-target="1-一页结论">1. 一页结论</a>
+<a class="toc-link level-3" href="#11-产品模型的根本变化" data-target="11-产品模型的根本变化">1.1 产品模型的根本变化</a>
+<a class="toc-link level-3" href="#12-核心差异总览" data-target="12-核心差异总览">1.2 核心差异总览</a>
+<a class="toc-link level-2" href="#2-旧项目的业务流程" data-target="2-旧项目的业务流程">2. 旧项目的业务流程</a>
+<a class="toc-link level-3" href="#21-旧项目端到端流程" data-target="21-旧项目端到端流程">2.1 旧项目端到端流程</a>
+<a class="toc-link level-3" href="#22-旧项目各阶段业务逻辑" data-target="22-旧项目各阶段业务逻辑">2.2 旧项目各阶段业务逻辑</a>
+<a class="toc-link level-3" href="#23-旧项目的业务特征与闭环边界" data-target="23-旧项目的业务特征与闭环边界">2.3 旧项目的业务特征与闭环边界</a>
+<a class="toc-link level-2" href="#3-teeko-v20-的目标流程" data-target="3-teeko-v20-的目标流程">3. Teeko V2.0 的目标流程</a>
+<a class="toc-link level-2" href="#4-按流程阶段的差异" data-target="4-按流程阶段的差异">4. 按流程阶段的差异</a>
+<a class="toc-link level-3" href="#41-获取账号与权益" data-target="41-获取账号与权益">4.1 获取账号与权益</a>
+<a class="toc-link level-3" href="#42-备课输入" data-target="42-备课输入">4.2 备课输入</a>
+<a class="toc-link level-3" href="#43-作品生成编辑与保存" data-target="43-作品生成编辑与保存">4.3 作品生成、编辑与保存</a>
+<a class="toc-link level-3" href="#44-题目与快速检查" data-target="44-题目与快速检查">4.4 题目与“快速检查”</a>
+<a class="toc-link level-3" href="#45-资源使用" data-target="45-资源使用">4.5 资源使用</a>
+<a class="toc-link level-3" href="#46-创建与进行课堂" data-target="46-创建与进行课堂">4.6 创建与进行课堂</a>
+<a class="toc-link level-3" href="#47-学生端" data-target="47-学生端">4.7 学生端</a>
+<a class="toc-link level-3" href="#48-课堂工具" data-target="48-课堂工具">4.8 课堂工具</a>
+<a class="toc-link level-3" href="#49-报告与下一次备课" data-target="49-报告与下一次备课">4.9 报告与下一次备课</a>
+<a class="toc-link level-2" href="#5-功能处置总表" data-target="5-功能处置总表">5. 功能处置总表</a>
+<a class="toc-link level-3" href="#51-保留的核心能力" data-target="51-保留的核心能力">5.1 保留的核心能力</a>
+<a class="toc-link level-3" href="#52-旧-demo-已有20-明确废弃的功能" data-target="52-旧-demo-已有20-明确废弃的功能">5.2 旧 Demo 已有、2.0 明确废弃的功能</a>
+<a class="toc-link level-3" href="#53-旧-demo-没有20-也明确不新增" data-target="53-旧-demo-没有20-也明确不新增">5.3 旧 Demo 没有、2.0 也明确不新增</a>
+<a class="toc-link level-3" href="#54-20-新增能力" data-target="54-20-新增能力">5.4 2.0 新增能力</a>
+<a class="toc-link level-2" href="#6-页面与路由迁移" data-target="6-页面与路由迁移">6. 页面与路由迁移</a>
+<a class="toc-link level-2" href="#7-业务对象与数据归属差异" data-target="7-业务对象与数据归属差异">7. 业务对象与数据归属差异</a>
+<a class="toc-link level-2" href="#8-20-原型改造重点" data-target="8-20-原型改造重点">8. 2.0 原型改造重点</a>
+<a class="toc-link level-3" href="#81-可以沿用的体验思想" data-target="81-可以沿用的体验思想">8.1 可以沿用的体验思想</a>
+<a class="toc-link level-3" href="#82-不应直接沿用的旧页面结构" data-target="82-不应直接沿用的旧页面结构">8.2 不应直接沿用的旧页面结构</a>
+<a class="toc-link level-3" href="#83-设计优先级" data-target="83-设计优先级">8.3 设计优先级</a>
+<a class="toc-link level-2" href="#9-影响差异结论的待确认事项" data-target="9-影响差异结论的待确认事项">9. 影响差异结论的待确认事项</a>
+<a class="toc-link level-2" href="#10-旧项目功能范围依据" data-target="10-旧项目功能范围依据">10. 旧项目功能范围依据</a>
+<a class="toc-link level-2" href="#11-最终迁移结论" data-target="11-最终迁移结论">11. 最终迁移结论</a></nav>
+    </aside>
+    <main class="document" id="document">
+      <header class="document-hero">
+        <p class="hero-label">产品迁移与范围决策</p>
+        <h1>Teeko V2.0 与旧项目差异说明</h1>
+        <p class="lede">完整梳理业务流程、功能处置、页面迁移、业务对象与研发待确认项。</p>
+        <div class="model-shift" aria-label="产品模型变化">
+          <div class="model old"><strong>旧项目</strong><span>学校工作空间、学校治理、正式任教关系、班级课堂</span></div>
+          <div class="shift-arrow" aria-hidden="true">→</div>
+          <div class="model new"><strong>Teeko V2.0</strong><span>学校采购激活码、教师个人账号、匿名课堂、连续备课闭环</span></div>
+        </div>
+      </header>
+      <div class="table-wrap meta-table"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>文档版本</td>
+<td>V1.8</td>
+</tr>
+<tr>
+<td>文档日期</td>
+<td>2026-08-31</td>
+</tr>
+<tr>
+<td>旧版基线</td>
+<td><code>demo/</code> 展示的旧 Teeko 产品方案</td>
+</tr>
+<tr>
+<td>新版基线</td>
+<td><a href="./teeko-prd.html">Teeko V2.0 PRD</a></td>
+</tr>
+<tr>
+<td>文档目的</td>
+<td>说明旧 Demo 中哪些流程和功能保留、调整、废弃或新增，为 2.0 原型与研发评审提供迁移依据</td>
+</tr>
+</tbody></table></div>
+<h2 id="0-阅读说明">0. 阅读说明<a class="heading-anchor" href="#0-阅读说明" aria-label="链接到本节">#</a></h2><p>本文比较的是 <code>demo/</code> 所代表的旧 Teeko 产品方案与 Teeko V2.0 产品方案，不是对两个原型的技术实现进行审计。旧 Demo 中呈现的页面、流程和功能，均按一个真实项目的产品设计来理解。</p>
+<p>状态定义：</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>状态</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>保留</strong></td>
+<td>业务价值或核心能力继续存在，但不代表必须沿用旧项目的具体页面结构或数据模型</td>
+</tr>
+<tr>
+<td><strong>调整</strong></td>
+<td>能力继续存在，但用户、入口、规则、数据归属或流程发生明显变化，不能直接照搬旧实现</td>
+</tr>
+<tr>
+<td><strong>废弃</strong></td>
+<td>2.0 原型和产品中不再出现可用入口，也不作为首版研发范围</td>
+</tr>
+<tr>
+<td><strong>新增</strong></td>
+<td>旧 Demo 没有形成、2.0 为闭环必须补齐的能力</td>
+</tr>
+<tr>
+<td><strong>不新增</strong></td>
+<td>旧 Demo 没有该能力，2.0 首版也不纳入产品范围</td>
+</tr>
+<tr>
+<td><strong>待确认</strong></td>
+<td>当前尚未形成明确产品决定，不应被视为已承诺范围</td>
+</tr>
+</tbody></table></div>
+<p>本文只讨论产品定位、业务流程、功能规则、用户权限和数据归属差异，不评价旧 Demo 是否接入真实后端、AI 服务或跨设备服务。</p>
+<hr>
+<h2 id="1-一页结论">1. 一页结论<a class="heading-anchor" href="#1-一页结论" aria-label="链接到本节">#</a></h2><h3 id="11-产品模型的根本变化">1.1 产品模型的根本变化<a class="heading-anchor" href="#11-产品模型的根本变化" aria-label="链接到本节">#</a></h3><figure class="code-block"><figcaption>text</figcaption><pre><code>旧 Demo
+学校工作空间 + 学校治理 + 正式任教关系 + 班级课堂
+                         ↓
+Teeko V2.0
+学校采购激活码 + 教师个人账号 + 匿名课堂 Session + 连续备课闭环</code></pre></figure><p>2.0 不是对旧 Demo 做功能删减，而是更换了核心业务对象：</p>
+<ul>
+<li>旧 Demo 的核心对象是“学校、学期、班级、任教关系和校本资源”；</li>
+<li>2.0 的核心对象是“教师个人账号、个人教学作品、匿名课堂和课堂报告”；</li>
+<li>学校从产品内管理者退到产品外采购者，只负责购买并把激活码发给教师；</li>
+<li>学生从“学校账号或临时身份”统一调整为“当堂完全匿名临时编号”；</li>
+<li>报告从流程终点变成下一次备课的入口。</li>
+</ul>
+<h3 id="12-核心差异总览">1.2 核心差异总览<a class="heading-anchor" href="#12-核心差异总览" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>旧 Demo</th>
+<th>Teeko V2.0</th>
+<th>处置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>产品形态</td>
+<td>学校治理、教师教学与学生记录混合的 B 端方案</td>
+<td>学校采购、教师个人使用的轻量 C 端产品</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>学校角色</td>
+<td>在产品内配置成员、班级、任教、政策和资源</td>
+<td>产品外采购并发放激活码</td>
+<td>学校管理端废弃</td>
+</tr>
+<tr>
+<td>教师身份</td>
+<td>学校邮箱 OTP + 学校成员/角色/任教关系</td>
+<td>教师个人账号 + 学校激活码权益</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>备课前置</td>
+<td>强依赖学校、学期、班级、课程包和任教 Context</td>
+<td>独立备课；学科、教学语言和教案均为选填，教学要求或教案至少提供一项</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>教学作品</td>
+<td>固定分页课件，主要按 10 页课件展示</td>
+<td>PPT、托管 HTML、动画、3D、互动游戏等多形态作品</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>学科闭环覆盖</td>
+<td>重点围绕数学和 English 课堂流程，PBL 作为预览型课例</td>
+<td>目标支持全部学科，均进入统一作品与课堂流程</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>题目</td>
+<td>每套课例配置首次与再试两道单选“快速检查”</td>
+<td>AI 根据最终作品自动生成单选、多选、判断配套题</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>开课</td>
+<td>依赖教学班与加入策略</td>
+<td>仅基于已保存且没有未保存修改的个人作品创建独立课堂 Session</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>学生</td>
+<td>学校账号学生或临时身份</td>
+<td>全部匿名扫码，仅保留当堂临时编号</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>内容同步</td>
+<td>主要同步教师当前播放的课件页</td>
+<td>学生平板只读同步教师正在播放和操作的多形态内容</td>
+<td>保留并扩展</td>
+</tr>
+<tr>
+<td>课堂工具</td>
+<td>8 个工具</td>
+<td>只保留投票、信号灯</td>
+<td>大幅废弃</td>
+</tr>
+<tr>
+<td>资源</td>
+<td>创作广场 + 校本资源库 + 教师发布</td>
+<td>平台资源广场 + 教师个人作品库</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>报告</td>
+<td>首次/再试证据和下一课建议文本</td>
+<td>匿名整体报告，并可选择反馈进入下一次备课</td>
+<td>调整并补闭环</td>
+</tr>
+<tr>
+<td>学生历史</td>
+<td>学校账号学生可保存个人单课记录</td>
+<td>不保存学生个人历史，不跨课堂识别</td>
+<td>废弃</td>
+</tr>
+<tr>
+<td>数据组织</td>
+<td>学校、班级、任教关系、账号学生与课堂记录</td>
+<td>教师个人资产、匿名课堂 Session 与整体报告</td>
+<td>调整</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-旧项目的业务流程">2. 旧项目的业务流程<a class="heading-anchor" href="#2-旧项目的业务流程" aria-label="链接到本节">#</a></h2><h3 id="21-旧项目端到端流程">2.1 旧项目端到端流程<a class="heading-anchor" href="#21-旧项目端到端流程" aria-label="链接到本节">#</a></h3><figure class="diagram-card" data-diagram="1"><figcaption><span>旧项目端到端业务流程</span><span class="diagram-note">原始流程完整渲染</span></figcaption><div class="mermaid">flowchart TD
+    A[Teeko 开通学校工作空间] --&gt; B[学校管理员配置学期、成员、角色、班级、任教和政策]
+    B --&gt; C[教师用学校邮箱 OTP 登录]
+    C --&gt; D{是否有正式任教关系}
+    D --&gt;|有| E[系统带入学校/班级/学科/语言/课时 Context]
+    D --&gt;|无| F[只能建立个人草稿]
+    F --&gt; G[不能开学校课堂、不能形成学生记录、不能进校本库]
+    E --&gt; H[教师输入教学意图或上传教学材料]
+    H --&gt; I[AI 生成分页教学课件]
+    I --&gt; J[逐页修改、形成 v2、查看或恢复 v1]
+    J --&gt; K{后续操作}
+    K --&gt;|资源| L[保存到校本资源或发布到创作广场]
+    K --&gt;|授课| M[选择学生加入与跟随模式]
+    M --&gt; N[创建课堂码、二维码和候课会话]
+    N --&gt; P[学生账号或临时身份加入候课]
+    P --&gt; O[教师开始课堂并翻页]
+    O --&gt;|使用检查| Q[快速检查：固定单选题]
+    O --&gt;|跳过检查| S
+    Q --&gt; R[公布结果/建议讲解/可选再试]
+    R --&gt; S[使用课堂工具或继续授课]
+    S --&gt; T[结束课堂]
+    T --&gt; U[写入教师课堂记录\n仅学校账号学生形成个人单课记录]
+    U --&gt; V[显示下一课建议文本]</div></figure><h3 id="22-旧项目各阶段业务逻辑">2.2 旧项目各阶段业务逻辑<a class="heading-anchor" href="#22-旧项目各阶段业务逻辑" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>用户操作</th>
+<th>旧系统行为</th>
+<th>主要问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>学校准备</td>
+<td>Teeko 开通工作空间后，管理员配置学校、学期、成员、权限、班级、任教和 AI 政策</td>
+<td>建立开课就绪度；学校管理员不自行创建或删除租户</td>
+<td>准备成本高，不符合轻量 C 端目标</td>
+</tr>
+<tr>
+<td>登录</td>
+<td>教师输入学校邮箱和六位验证码</td>
+<td>根据学校成员关系和角色分流教师/学生/管理工作</td>
+<td>没有学校采购后向教师发激活码的流程</td>
+</tr>
+<tr>
+<td>备课</td>
+<td>使用系统带入的教学班、课时、语言和偏好，可按需切换/覆盖，再输入教学意图</td>
+<td>自动带入学校及任教 Context</td>
+<td>备课依赖学校结构；年级、班级和课时占据核心位置</td>
+</tr>
+<tr>
+<td>生成</td>
+<td>提交生成</td>
+<td>根据教学意图和教学 Context 生成分页课件</td>
+<td>作品形态和教学流程主要围绕分页内容设计</td>
+</tr>
+<tr>
+<td>修改</td>
+<td>输入“修改本页”指令</td>
+<td>形成新版本，并保留旧版本查看/恢复入口</td>
+<td>修改逻辑以具体页面为核心</td>
+</tr>
+<tr>
+<td>资源</td>
+<td>收藏、复制、发布、保存最终课件</td>
+<td>管理创作广场资源和校本资源</td>
+<td>资源归属围绕学校与跨校教师共享</td>
+</tr>
+<tr>
+<td>开课</td>
+<td>选择班级、学生加入方式和跟随模式</td>
+<td>创建课堂码、二维码与课堂 Session</td>
+<td>课堂必须携带学校、班级和任教 Context</td>
+</tr>
+<tr>
+<td>授课</td>
+<td>翻页；可跳过快速检查，也可发布首次题、决定是否讲解及再试</td>
+<td>记录首次检查、教师调整和可选再试</td>
+<td>一旦使用检查，题目轮次和干预路径较固定</td>
+</tr>
+<tr>
+<td>学生</td>
+<td>学校账号登录或临时加入</td>
+<td>同步当前页，作答并等待教师公布</td>
+<td>学校账号会形成个人单课记录，不符合 2.0 完全匿名原则</td>
+</tr>
+<tr>
+<td>报告</td>
+<td>教师结束课堂</td>
+<td>生成首次/再试、理解困难、教师总结和下一课建议</td>
+<td>下一课建议只能查看，不能直接进入下一次备课</td>
+</tr>
+</tbody></table></div>
+<h3 id="23-旧项目的业务特征与闭环边界">2.3 旧项目的业务特征与闭环边界<a class="heading-anchor" href="#23-旧项目的业务特征与闭环边界" aria-label="链接到本节">#</a></h3><ol>
+<li><strong>学校治理是使用前提</strong>：学校、学期、成员、班级和任教关系共同决定教师可以开展哪些教学工作。</li>
+<li><strong>备课以教学班 Context 为起点</strong>：系统为教师带入级别、学科、授课语言、术语和课时设置。</li>
+<li><strong>作品以分页课件为核心</strong>：内容编辑、版本恢复、学生同步和快速检查都围绕课件页面组织。</li>
+<li><strong>课堂采用固定的形成性检查路径</strong>：教师可以跳过快速检查；一旦使用，主要围绕首次作答、教师讲解和可选再试展开。</li>
+<li><strong>学生身份采用混合模式</strong>：既支持学校账号学生，也支持临时参与者；学校账号学生可以形成个人单课记录。</li>
+<li><strong>资源分为创作广场和校本资源</strong>：教师可以发现、复制、改编、发布资源，也可以把最终课件沉淀为学校资产。</li>
+<li><strong>报告面向班级课堂证据</strong>：同时存在教师班级课堂记录和学校账号学生的个人单课记录。</li>
+<li><strong>连续教学尚未形成操作闭环</strong>：报告能给出下一课建议，但没有选择反馈并直接创建下一次备课的动作。</li>
+</ol>
+<hr>
+<h2 id="3-teeko-v20-的目标流程">3. Teeko V2.0 的目标流程<a class="heading-anchor" href="#3-teeko-v20-的目标流程" aria-label="链接到本节">#</a></h2><figure class="diagram-card" data-diagram="2"><figcaption><span>Teeko V2.0 目标业务闭环</span><span class="diagram-note">原始流程完整渲染</span></figcaption><div class="mermaid">flowchart TD
+    A[学校在产品外采购] --&gt; B[学校向教师发放激活码]
+    B --&gt; C[教师登录个人账号并激活权益]
+    C --&gt; D{选择备课入口}
+    D --&gt;|独立备课| E[按需选择学科与教学语言\n输入要求和/或上传选填教案]
+    D --&gt;|资源广场| F[选择平台资源]
+    D --&gt;|课堂报告| G[选择上一课整体反馈]
+    F --&gt; F1{收藏或使用}
+    F1 --&gt;|收藏| F2[只保存收藏关系\n留在资源详情]
+    F1 --&gt;|使用并修改| H[T05 复制平台资源]
+    G --&gt; E
+    E --&gt; I[调用现有教学作品生成服务]
+    H --&gt; H2[建立未保存个人草稿]
+    H2 --&gt; K[AI 自动生成配套正式题]
+    I --&gt; J[取得不可变版本、托管链接和内容摘要]
+    J --&gt; K[AI 自动生成配套正式题]
+    K --&gt; L[进入编辑页，状态为未保存]
+    L --&gt; M[教师首次选择“保存课件”]
+    M --&gt; N[作品与题目进入个人作品库]
+    N --&gt; N0{后续操作}
+    N0 --&gt;|修改内容或题目| N1[建立未保存工作副本\n主操作显示“保存修改”]
+    N1 --&gt;|保存修改| N
+    N0 --&gt;|无未保存修改| O[创建匿名课堂 Session 和二维码]
+    O --&gt; P[学生平板扫码并获得当堂临时编号\n进入候课]
+    P --&gt; P2[教师点击开始课堂]
+    P2 --&gt; Q[只读同步教师教学内容与操作效果]
+    Q --&gt; R[教师发布正式题/投票/信号灯]
+    R --&gt; S[收集当堂匿名提交和整体分布]
+    S --&gt; T[结束课堂并形成整体报告\n自动或手动触发待确认]
+    T --&gt; U[教师选择反馈进入下一次备课]
+    U --&gt; E</div></figure><p>2.0 的闭环判断标准是：报告中的课堂整体反馈可以由教师主动带入下一次备课，而不是只展示一句建议。</p>
+<hr>
+<h2 id="4-按流程阶段的差异">4. 按流程阶段的差异<a class="heading-anchor" href="#4-按流程阶段的差异" aria-label="链接到本节">#</a></h2><h3 id="41-获取账号与权益">4.1 获取账号与权益<a class="heading-anchor" href="#41-获取账号与权益" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>旧 Demo</th>
+<th>Teeko V2.0</th>
+<th>处置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>教师登录</td>
+<td>学校邮箱 + OTP</td>
+<td>教师个人账号登录；方式待确认</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>权益来源</td>
+<td>学校成员、角色、课程包和任教关系</td>
+<td>学校采购并向教师发激活码</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>开通流程</td>
+<td>Teeko 开通学校工作空间，管理员再配置校内结构</td>
+<td>教师登录后兑换激活码</td>
+<td>新增激活流程</td>
+</tr>
+<tr>
+<td>学校后台</td>
+<td>完整学校管理端</td>
+<td>无学校管理端</td>
+<td>废弃</td>
+</tr>
+<tr>
+<td>到期/续费</td>
+<td>无明确商业权益状态</td>
+<td>激活码有效期、续期、到期权限</td>
+<td>新增；具体规则待确认</td>
+</tr>
+</tbody></table></div>
+<h3 id="42-备课输入">4.2 备课输入<a class="heading-anchor" href="#42-备课输入" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>旧 Demo</th>
+<th>Teeko V2.0</th>
+<th>处置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>备课入口</td>
+<td>首页输入教学意图</td>
+<td>独立备课入口继续保留</td>
+<td>保留</td>
+</tr>
+<tr>
+<td>学科</td>
+<td>来自任教班 Context，可切换</td>
+<td>选填，目标支持全部学科</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>教学语言</td>
+<td>中文、英文、中英并用及术语偏好</td>
+<td>选填，可指定繁体中文或英文，也可不指定</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>年级/级别</td>
+<td>Context 核心字段</td>
+<td>不提供</td>
+<td>废弃</td>
+</tr>
+<tr>
+<td>班级</td>
+<td>正式任教班是开课前置</td>
+<td>备课和开课均不依赖班级</td>
+<td>废弃</td>
+</tr>
+<tr>
+<td>课时</td>
+<td>35/40/45/50 分钟必选式展示</td>
+<td>不属于已确认核心输入</td>
+<td>调整；是否保留为选填待确认</td>
+</tr>
+<tr>
+<td>教学要求</td>
+<td>自然语言输入</td>
+<td>保留</td>
+<td>保留</td>
+</tr>
+<tr>
+<td>教案/材料</td>
+<td>支持上传教学材料辅助生成</td>
+<td>明确为选填的“上传教案”，可单独或与教学要求同时使用</td>
+<td>保留并明确</td>
+</tr>
+<tr>
+<td>偏好</td>
+<td>学校默认、教师长期偏好、本课调整三层</td>
+<td>轻量化为本次备课输入；是否保留长期偏好待确认</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>报告入口</td>
+<td>无</td>
+<td>可从报告选择反馈开始备课</td>
+<td>新增</td>
+</tr>
+</tbody></table></div>
+<h3 id="43-作品生成编辑与保存">4.3 作品生成、编辑与保存<a class="heading-anchor" href="#43-作品生成编辑与保存" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>旧 Demo</th>
+<th>Teeko V2.0</th>
+<th>处置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>生成能力</td>
+<td>根据教学意图和学校 Context 生成课件</td>
+<td>调用现有教学作品生成服务</td>
+<td>保留并调整</td>
+</tr>
+<tr>
+<td>内容结构</td>
+<td>以分页课件为核心，数学和 English 展示完整课件，PBL 偏预览型</td>
+<td>不限 PPT，可为 HTML、动画、3D、互动游戏</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>闭环覆盖</td>
+<td>完整课堂流程重点覆盖数学和 English，PBL 主要展示生成预览</td>
+<td>目标支持全部学科，并使用统一的备课—课堂—报告流程</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>生成结果</td>
+<td>课件版本、内容页和教学 Context</td>
+<td>不可变版本 ID、托管链接、内容摘要</td>
+<td>调整数据结构</td>
+</tr>
+<tr>
+<td>资源改编进度</td>
+<td>资源复用与课件生成共用创作体验</td>
+<td>使用并修改属于资源复制，进度显示“读取资源 → 复制内容 → 建立未保存个人草稿 → 生成配套题 → 准备编辑”，不展示从零生成课件的阶段</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>作品编辑</td>
+<td>以“修改当前页”和版本恢复为核心</td>
+<td>返回候选结果后直接预览；教师可基于最新候选版本继续修改并进行多轮迭代，最终“套用新版本”时只写入未保存工作副本，不直接覆盖已保存版本；接口协议待技术核验</td>
+<td>保留并扩展</td>
+</tr>
+<tr>
+<td>版本恢复</td>
+<td>可恢复 v1</td>
+<td>2.0 是否提供完整版本历史/回滚待确认</td>
+<td>待确认</td>
+</tr>
+<tr>
+<td>个人保存</td>
+<td>个人草稿与校本最终版并存，最终沉淀偏向校本资源</td>
+<td>生成/改编结果首次进入 T06 时为未保存草稿，主操作显示“保存课件”；保存后的作品只要内容或题目发生修改，就建立未保存工作副本，主操作改为“保存修改”；保存成功后才更新个人作品库中的版本</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>保存前开课</td>
+<td>修改课件后可继续进入授课流程，保存边界不清晰</td>
+<td>首次“保存课件”或后续“保存修改”成功前均禁止创建课堂，课堂只能使用完整的已保存作品与配套题</td>
+<td>新增明确限制</td>
+</tr>
+</tbody></table></div>
+<h3 id="44-题目与快速检查">4.4 题目与“快速检查”<a class="heading-anchor" href="#44-题目与快速检查" aria-label="链接到本节">#</a></h3><p>旧项目并不是“只能在某个 PPT 页面发布问题”。教师处于讲解状态时可以发起快速检查；课件中虽然有承载快速检查内容的页面，但业务流程并不要求教师必须停留在该页。旧版的核心设计是每个课例预先配置首次检查和可选再试题。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>旧 Demo</th>
+<th>Teeko V2.0</th>
+<th>处置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>题目来源</td>
+<td>每套课例预先配置首次检查题和再试题</td>
+<td>AI 根据最终教学作品内容摘要自动生成</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>题型</td>
+<td>只有单选题</td>
+<td>单选、多选、判断；无简答题</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>数量</td>
+<td>每个完整课例围绕首次 1 题和可选再试 1 题组织</td>
+<td>默认数量与题型组合待确认</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>教师管理</td>
+<td>不能新增、删除或修改题目</td>
+<td>可修改、删除、手动新增、重新生成；任一修改先进入未保存工作副本，点击“保存修改”后才更新已保存作品</td>
+<td>新增</td>
+</tr>
+<tr>
+<td>发布确认</td>
+<td>题目作为固定课堂步骤</td>
+<td>AI 题无需备课确认，教师上课时决定是否发布</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>页关联</td>
+<td>快速检查按课例组织，不要求绑定某一课件页</td>
+<td>仅 PPT 可选关联页；非 PPT 只关联整份作品</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>发布时机</td>
+<td>授课状态即可发起，不强制当前页</td>
+<td>任意教学时点均可发布</td>
+<td>保留并明确</td>
+</tr>
+<tr>
+<td>改答</td>
+<td>首次提交后选项被禁用</td>
+<td>教师结束收集前可修改，以最后一次成功提交为准</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>结果</td>
+<td>展示提交人数、选项分布和正确率</td>
+<td>保留整体结果，并统一为完全匿名课堂数据</td>
+<td>保留并调整</td>
+</tr>
+<tr>
+<td>作品内练习</td>
+<td>旧版是静态 slide，题面展示与课堂答题状态分开，没有复杂内嵌交互边界</td>
+<td>HTML/游戏内置练习只属教学内容，不进入 Teeko 正式统计</td>
+<td>新增边界</td>
+</tr>
+<tr>
+<td>修改作品后的题目</td>
+<td>页面修改与课例预设检查题分别管理</td>
+<td>不自动更新配套题；教师需要时主动重新生成；PPT 删除关联页只解除关联、不删题；相关变更保留在未保存工作副本中，直至教师点击“保存修改”</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>题目来源标签</td>
+<td>不适用</td>
+<td>页面和报告不标注题目来源</td>
+<td>新规则</td>
+</tr>
+</tbody></table></div>
+<h3 id="45-资源使用">4.5 资源使用<a class="heading-anchor" href="#45-资源使用" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>旧 Demo</th>
+<th>Teeko V2.0</th>
+<th>处置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>广场定位</td>
+<td>跨学校教师/学校资源的“创作广场”</td>
+<td>仅由平台提供的资源广场</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>资源来源展示</td>
+<td>教师、学校、空间、改编次数</td>
+<td>平台提供；具体元数据待确认</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>收藏</td>
+<td>支持收藏创作广场资源</td>
+<td>保留，并提供清晰的“我的收藏”视图</td>
+<td>保留并补充入口</td>
+</tr>
+<tr>
+<td>使用资源</td>
+<td>按教学班 Context 建副本和改编</td>
+<td>复制为未保存个人草稿，自动出题并进入 T06；教师点击“保存课件”后才成为个人版本</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>修改方式</td>
+<td>先按教学班 Context 建立副本，再进入课件工作台修改</td>
+<td>未保存个人草稿及保存后的个人版本需要适配分页和非分页作品；现有生成服务的改编、新版本和摘要能力待技术核验</td>
+<td>调整；技术待确认</td>
+</tr>
+<tr>
+<td>正式题</td>
+<td>部分静态资源自身带快速检查/诊断内容</td>
+<td>平台资源不含正式题；复制成未保存个人草稿后 AI 自动出题，完成后进入 T06</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>校本资源库</td>
+<td>最终课件保存为学校资产，同校复用、科主任治理</td>
+<td>不保留学校资源库</td>
+<td>废弃</td>
+</tr>
+<tr>
+<td>教师发布</td>
+<td>教师可发布到创作广场</td>
+<td>教师不能向资源广场发布</td>
+<td>废弃</td>
+</tr>
+</tbody></table></div>
+<h3 id="46-创建与进行课堂">4.6 创建与进行课堂<a class="heading-anchor" href="#46-创建与进行课堂" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>旧 Demo</th>
+<th>Teeko V2.0</th>
+<th>处置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>开课前置</td>
+<td>有效学期、课程包、教师、教学班和任教关系</td>
+<td>有效教师权益 + 已保存且没有未保存工作副本的个人教学作品；存在未保存草稿或未保存修改时禁止创建课堂</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>课堂对象</td>
+<td>绑定学校、班级和教学 Context</td>
+<td>每次开课生成独立 Session</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>作品快照</td>
+<td>开课时锁定课件版本和班级 Context</td>
+<td>开始前冻结不可变作品版本和配套题快照</td>
+<td>保留并简化</td>
+</tr>
+<tr>
+<td>冻结时点</td>
+<td>创建课堂时锁定</td>
+<td>创建还是开始时冻结待确认</td>
+<td>待确认</td>
+</tr>
+<tr>
+<td>学生加入策略</td>
+<td>可选仅编班学生或允许临时身份</td>
+<td>全部匿名扫码</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>二维码</td>
+<td>每堂课生成课堂码、二维码和加入链接</td>
+<td>每堂生成独立匿名课堂凭证，不再关联学籍</td>
+<td>保留并调整</td>
+</tr>
+<tr>
+<td>候课室</td>
+<td>有</td>
+<td>保留教师候课室和学生候课状态</td>
+<td>保留</td>
+</tr>
+<tr>
+<td>内容控制</td>
+<td>教师翻页；可选择跟随/自由浏览</td>
+<td>教师唯一控制，学生只读跟随</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>作品范围</td>
+<td>分页课件</td>
+<td>PPT、HTML、动画、3D、互动游戏</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>同步内容</td>
+<td>同步教师当前课件页和课堂工具效果</td>
+<td>扩展到教师当前页面、场景和复杂作品操作效果；技术范围待核验</td>
+<td>保留并扩展</td>
+</tr>
+<tr>
+<td>课堂结束</td>
+<td>保存课堂记录并进入报告</td>
+<td>关闭加入和提交，形成个人课堂历史和报告</td>
+<td>调整</td>
+</tr>
+</tbody></table></div>
+<h3 id="47-学生端">4.7 学生端<a class="heading-anchor" href="#47-学生端" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>旧 Demo</th>
+<th>Teeko V2.0</th>
+<th>处置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>身份</td>
+<td>学校账号学生或临时身份</td>
+<td>全部使用当堂匿名临时编号</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>信息采集</td>
+<td>学校账号可关联学籍、班级和个人记录</td>
+<td>不输入姓名、学号、班级或账号</td>
+<td>废弃个人信息</td>
+</tr>
+<tr>
+<td>编号</td>
+<td>临时参与者获得本堂临时身份</td>
+<td>每堂现场生成且只在本堂有效，不与学校账号并存</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>跨课堂</td>
+<td>学校账号学生可回看个人单课记录</td>
+<td>不跨课堂识别，不形成个人学情</td>
+<td>废弃</td>
+</tr>
+<tr>
+<td>教学内容</td>
+<td>支持跟随教师或学生自由浏览的课堂策略</td>
+<td>统一为只读同步教师内容和操作效果</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>作品操作</td>
+<td>主要是静态 slide</td>
+<td>不可翻页、拖动、点控件、改参数或操作游戏</td>
+<td>新增明确限制</td>
+</tr>
+<tr>
+<td>作答</td>
+<td>固定单选题，提交后不可修改</td>
+<td>单选、多选、判断；收集结束前可改答</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>结果</td>
+<td>公布后看本人对错、正确答案/解析和匿名班级正确率</td>
+<td>公布后看本人结果和完整选项分布；详细字段待确认</td>
+<td>保留并扩展</td>
+</tr>
+<tr>
+<td>课后页面</td>
+<td>学校账号保存个人单课记录</td>
+<td>只显示课堂结束，不保留学生历史</td>
+<td>废弃</td>
+</tr>
+</tbody></table></div>
+<h3 id="48-课堂工具">4.8 课堂工具<a class="heading-anchor" href="#48-课堂工具" aria-label="链接到本节">#</a></h3><p>旧 Demo 实际包含 8 个工具：专注/锁屏、投票、小组计分、信号灯、聚光灯、实时白板、计时器、随机点名。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>旧工具</th>
+<th>Teeko V2.0 处置</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>投票</td>
+<td><strong>保留并调整</strong></td>
+<td>教师现场输入问题和 2–4 个选项；与正式题分开</td>
+</tr>
+<tr>
+<td>信号灯</td>
+<td><strong>保留并调整</strong></td>
+<td>作为匿名即时理解反馈，不计算正确率</td>
+</tr>
+<tr>
+<td>专注/锁屏</td>
+<td><strong>废弃</strong></td>
+<td>不再控制或覆盖学生课堂画面</td>
+</tr>
+<tr>
+<td>小组计分</td>
+<td><strong>废弃</strong></td>
+<td>不保留分组与积分逻辑</td>
+</tr>
+<tr>
+<td>聚光灯</td>
+<td><strong>废弃</strong></td>
+<td>不作为独立课堂工具</td>
+</tr>
+<tr>
+<td>实时白板</td>
+<td><strong>废弃</strong></td>
+<td>不建设师生白板同步</td>
+</tr>
+<tr>
+<td>计时器</td>
+<td><strong>废弃</strong></td>
+<td>不作为首版课堂工具</td>
+</tr>
+<tr>
+<td>随机点名</td>
+<td><strong>废弃</strong></td>
+<td>与完全匿名、无名单原则不匹配</td>
+</tr>
+</tbody></table></div>
+<p>投票和信号灯的单选/多选、改答、结束、公布及是否进入报告仍为<strong>待确认</strong>。</p>
+<h3 id="49-报告与下一次备课">4.9 报告与下一次备课<a class="heading-anchor" href="#49-报告与下一次备课" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>旧 Demo</th>
+<th>Teeko V2.0</th>
+<th>处置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>报告对象</td>
+<td>教师班级课堂记录 + 学校账号学生单课记录</td>
+<td>仅教师个人课堂报告</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>数据粒度</td>
+<td>匿名班级汇总，同时保留学校账号学生的个人记录</td>
+<td>报告只展示整堂课堂整体汇总；底层原始匿名答案保留时长待确认</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>证据结构</td>
+<td>固定首次、理解困难、教师干预、再试变化</td>
+<td>正式题形成整体汇总；投票和信号灯是否进入报告待确认</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>正确率</td>
+<td>根据首次与再试作答展示班级结果</td>
+<td>根据各次正式题的匿名提交形成整体统计</td>
+<td>保留并调整</td>
+</tr>
+<tr>
+<td>教师总结</td>
+<td>系统整理课堂证据并提供教师总结草稿与下一课建议</td>
+<td>报告供教师个人复盘；是否提供 AI 文字复盘待确认</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>下一课建议</td>
+<td>只显示文本</td>
+<td>教师选择报告反馈并进入新备课</td>
+<td>新增闭环</td>
+</tr>
+<tr>
+<td>历史入口</td>
+<td>报告主要围绕当前或指定课堂记录查看</td>
+<td>提供独立的教师个人课堂历史列表</td>
+<td>新增/补齐</td>
+</tr>
+<tr>
+<td>学校查看</td>
+<td>报告基于学校和班级 Context</td>
+<td>无学校管理端，不向学校提供常规报告入口</td>
+<td>调整</td>
+</tr>
+<tr>
+<td>学生查看</td>
+<td>学校账号可回看本人单课记录</td>
+<td>学生无课后历史</td>
+<td>废弃</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="5-功能处置总表">5. 功能处置总表<a class="heading-anchor" href="#5-功能处置总表" aria-label="链接到本节">#</a></h2><h3 id="51-保留的核心能力">5.1 保留的核心能力<a class="heading-anchor" href="#51-保留的核心能力" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>功能</th>
+<th>保留内容</th>
+<th>2.0 中的变化</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AI 提示式备课</td>
+<td>教师用自然语言描述教学意图</td>
+<td>不再依赖学校任教 Context，复用现有教学作品生成服务</td>
+</tr>
+<tr>
+<td>教学材料输入</td>
+<td>教师可基于已有材料备课</td>
+<td>材料入口收敛为明确的教案上传与解析</td>
+</tr>
+<tr>
+<td>教学作品预览与修改</td>
+<td>教师可查看并调整生成结果</td>
+<td>从分页课件编辑扩展为多形态作品；返回候选结果后直接预览，可基于最新候选进行多轮修改；“套用新版本”的结果先进入未保存工作副本，点击“保存修改”后才更新个人作品；知雀接口待核验</td>
+</tr>
+<tr>
+<td>教师个人创作</td>
+<td>教师可重复使用自己的内容</td>
+<td>建立清晰的个人作品库；首次入库使用“保存课件”，后续内容或题目修改使用“保存修改”</td>
+</tr>
+<tr>
+<td>资源广场</td>
+<td>教师可发现和使用已有内容</td>
+<td>资源只由平台提供，支持收藏、建立未保存草稿并保存为个人版本</td>
+</tr>
+<tr>
+<td>资源副本</td>
+<td>修改副本不影响原资源</td>
+<td>通过专属资源复制进度形成未保存草稿并自动生成配套题，不重新从零生成教学内容；教师点击“保存课件”后保存为个人作品</td>
+</tr>
+<tr>
+<td>作品版本快照</td>
+<td>开课后内容不受后续编辑影响</td>
+<td>只冻结作品版本和题目，不冻结班级 Context</td>
+</tr>
+<tr>
+<td>二维码入课</td>
+<td>学生扫描教师二维码加入</td>
+<td>改为完全匿名的临时课堂 Session</td>
+</tr>
+<tr>
+<td>学生内容同步</td>
+<td>学生看到教师当前教学内容</td>
+<td>扩展到多形态作品的只读操作效果同步</td>
+</tr>
+<tr>
+<td>教师发布题目</td>
+<td>上课时由教师决定是否提问</td>
+<td>从固定快速检查升级为 AI 配套正式题</td>
+</tr>
+<tr>
+<td>学生查看公布结果</td>
+<td>旧版查看本人对错、答案/解析及班级正确率</td>
+<td>2.0 增加完整选项分布，并去除长期学生记录</td>
+</tr>
+<tr>
+<td>投票和信号灯</td>
+<td>收集课堂即时反馈</td>
+<td>与正式题分开建模，不计算知识正确率</td>
+</tr>
+<tr>
+<td>课堂报告</td>
+<td>课后整理课堂证据</td>
+<td>只展示匿名整体汇总，并成为下一次备课入口</td>
+</tr>
+</tbody></table></div>
+<h3 id="52-旧-demo-已有20-明确废弃的功能">5.2 旧 Demo 已有、2.0 明确废弃的功能<a class="heading-anchor" href="#52-旧-demo-已有20-明确废弃的功能" aria-label="链接到本节">#</a></h3><h4 id="学校与组织管理">学校与组织管理<a class="heading-anchor" href="#学校与组织管理" aria-label="链接到本节">#</a></h4><ul>
+<li>学校管理首页及开课就绪度；</li>
+<li>学校设置、学校工作空间和租户切换；</li>
+<li>学期管理；</li>
+<li>人员邀请、成员停用/恢复、角色和学科范围；</li>
+<li>班级、名册、教师任教关系；</li>
+<li>CSV 导入教学结构；</li>
+<li>学科教学默认设置、课程包和课时起点；</li>
+<li>AI 供应、学生数据、外部网页和预算政策；</li>
+<li>广场发布与校本资源保存策略；</li>
+<li>学校审计日志；</li>
+<li>学校级课堂数据看板。</li>
+</ul>
+<h4 id="学生与班级">学生与班级<a class="heading-anchor" href="#学生与班级" aria-label="链接到本节">#</a></h4><ul>
+<li>学生账号登录；</li>
+<li>学籍验证和编班限制；</li>
+<li>姓名、学号、学校成员关系；</li>
+<li>学生个人单课历史；</li>
+<li>学校账号形成的跨课堂持续身份；</li>
+<li>“只限已编班学生”的入课模式；</li>
+<li>学生自由浏览教师课件的模式。</li>
+</ul>
+<h4 id="资源与发布">资源与发布<a class="heading-anchor" href="#资源与发布" aria-label="链接到本节">#</a></h4><ul>
+<li>校本资源库；</li>
+<li>科主任封存/恢复校本资源；</li>
+<li>保存最终课件为学校资产；</li>
+<li>教师向创作广场发布个人作品；</li>
+<li>资源按学校/空间/校内权限治理；</li>
+<li>资源自身携带快速检查/诊断检查内容并作为课堂题来源。</li>
+</ul>
+<h4 id="教学与课堂">教学与课堂<a class="heading-anchor" href="#教学与课堂" aria-label="链接到本节">#</a></h4><ul>
+<li>快速检查可以跳过，但一旦使用便固定为“首次题 → 可选建议讲解 → 可选再试”的状态机；</li>
+<li>固定的两道单选题；</li>
+<li>专注/锁屏、小组计分、聚光灯、实时白板、计时器、随机点名；</li>
+<li>将报告结果保存为学生个人记录。</li>
+</ul>
+<h3 id="53-旧-demo-没有20-也明确不新增">5.3 旧 Demo 没有、2.0 也明确不新增<a class="heading-anchor" href="#53-旧-demo-没有20-也明确不新增" aria-label="链接到本节">#</a></h3><ul>
+<li>简答题；</li>
+<li>学生长期能力标签、个人画像和跨课堂个人学情；</li>
+</ul>
+<h3 id="54-20-新增能力">5.4 2.0 新增能力<a class="heading-anchor" href="#54-20-新增能力" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>新增能力</th>
+<th>补齐的缺口</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>学校激活码 → 教师个人权益</td>
+<td>替代学校管理后台和任教授权链</td>
+</tr>
+<tr>
+<td>教师个人作品库</td>
+<td>替代校本资源对教师个人资产的承载</td>
+</tr>
+<tr>
+<td>教师个人课堂历史</td>
+<td>提供稳定的历史与报告入口</td>
+</tr>
+<tr>
+<td>三种备课入口</td>
+<td>独立备课、平台资源、课堂报告都能开始新作品</td>
+</tr>
+<tr>
+<td>教案上传</td>
+<td>提供选填入口，让教师可以直接以已有教案作为生成输入</td>
+</tr>
+<tr>
+<td>多形态教学作品</td>
+<td>支持 HTML、动画、3D、互动游戏等非 PPT 内容</td>
+</tr>
+<tr>
+<td>内容摘要与不可变版本</td>
+<td>为出题、开课快照和继续备课提供可靠数据基础</td>
+</tr>
+<tr>
+<td>AI 配套题生成</td>
+<td>让每份教学作品拥有可编辑、可发布的配套题</td>
+</tr>
+<tr>
+<td>单选/多选/判断题管理</td>
+<td>支持修改、删除、新增和重新生成</td>
+</tr>
+<tr>
+<td>独立互动轮次</td>
+<td>让题目、投票和信号灯分别形成可控制的收集状态</td>
+</tr>
+<tr>
+<td>学生改答</td>
+<td>收集结束前使用最后一次成功提交</td>
+</tr>
+<tr>
+<td>完全匿名临时编号</td>
+<td>不依赖学生账号也能当堂去重和恢复</td>
+</tr>
+<tr>
+<td>复杂作品只读状态同步</td>
+<td>产品目标是学生只读看到教师操作效果；支持形态和降级方案待技术核验</td>
+</tr>
+<tr>
+<td>完全匿名整体报告</td>
+<td>不建立学生长期身份，只供教师查看课堂整体表现</td>
+</tr>
+<tr>
+<td>报告继续备课</td>
+<td>教师选择反馈并生成下一份独立作品和配套题</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="6-页面与路由迁移">6. 页面与路由迁移<a class="heading-anchor" href="#6-页面与路由迁移" aria-label="链接到本节">#</a></h2><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>旧 Demo 路由/页面</th>
+<th>旧用途</th>
+<th>2.0 对应页面</th>
+<th>处置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/sign-in</code></td>
+<td>学校邮箱 OTP 登录和身份分流</td>
+<td>T01 账号进入 + T02 权益激活</td>
+<td>调整</td>
+</tr>
+<tr>
+<td><code>/</code></td>
+<td>教师首页与备课输入</td>
+<td>T03 教师首页 + T04 新建备课</td>
+<td>拆分并调整</td>
+</tr>
+<tr>
+<td><code>/create</code></td>
+<td>分页课件生成、逐页修改、资源和开课入口</td>
+<td>T05 任务进度（从零生成或资源复制专属进度）+ T06 作品详情/编辑</td>
+<td>拆分并重做</td>
+</tr>
+<tr>
+<td><code>/square</code></td>
+<td>跨校创作广场</td>
+<td>T07 资源广场/我的收藏 + T08 资源详情</td>
+<td>保留并调整</td>
+</tr>
+<tr>
+<td><code>/library</code></td>
+<td>校本资源库</td>
+<td>T09 教师个人作品库</td>
+<td>旧页面废弃，功能重新定义</td>
+</tr>
+<tr>
+<td><code>/classroom</code></td>
+<td>按课堂状态重定向</td>
+<td>T12 教师候课室</td>
+<td>调整</td>
+</tr>
+<tr>
+<td><code>/live</code></td>
+<td>教师课堂</td>
+<td>T13 教师授课页</td>
+<td>保留并重做</td>
+</tr>
+<tr>
+<td><code>/report</code></td>
+<td>教师班级课堂记录</td>
+<td>T14 报告生成 + T15 报告详情 + T16 课堂历史</td>
+<td>拆分并补闭环</td>
+</tr>
+<tr>
+<td><code>/student</code></td>
+<td>学校账号/临时学生课堂与课后记录</td>
+<td>S01–S08 匿名学生课堂状态</td>
+<td>重做</td>
+</tr>
+<tr>
+<td><code>/admin</code></td>
+<td>学校管理首页</td>
+<td>无</td>
+<td>废弃</td>
+</tr>
+<tr>
+<td><code>/admin/school-settings</code>、<code>/admin/setup</code></td>
+<td>学校设置</td>
+<td>无</td>
+<td>废弃</td>
+</tr>
+<tr>
+<td><code>/admin/access</code>、<code>/admin/people</code></td>
+<td>人员、邀请、角色、范围</td>
+<td>无</td>
+<td>废弃</td>
+</tr>
+<tr>
+<td><code>/admin/teaching-structure</code>、<code>/admin/classes</code>、<code>/admin/assignments</code></td>
+<td>班级、名册、任教关系</td>
+<td>无</td>
+<td>废弃</td>
+</tr>
+<tr>
+<td><code>/admin/teaching-settings</code>、<code>/admin/teaching</code></td>
+<td>学科教学默认设置</td>
+<td>无</td>
+<td>废弃</td>
+</tr>
+<tr>
+<td><code>/admin/policies</code></td>
+<td>AI、数据、发布及预算政策</td>
+<td>无</td>
+<td>废弃</td>
+</tr>
+<tr>
+<td><code>/admin/audit</code></td>
+<td>学校操作日志</td>
+<td>无</td>
+<td>废弃</td>
+</tr>
+<tr>
+<td><code>/__prototype-control</code></td>
+<td>内部原型验收控制</td>
+<td>不属于产品信息架构</td>
+<td>不迁移</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="7-业务对象与数据归属差异">7. 业务对象与数据归属差异<a class="heading-anchor" href="#7-业务对象与数据归属差异" aria-label="链接到本节">#</a></h2><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>业务对象</th>
+<th>旧项目</th>
+<th>Teeko V2.0</th>
+<th>核心变化</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>教师身份</td>
+<td>教师属于学校工作空间，并受角色、学科范围和任教关系约束</td>
+<td>教师使用个人账号，通过学校发放的激活码获得使用权益</td>
+<td>从组织成员转为个人产品用户</td>
+</tr>
+<tr>
+<td>使用权限</td>
+<td>由学校成员身份、角色、课程包和相关策略共同决定</td>
+<td>由账号状态和激活权益决定</td>
+<td>删除学校级权限链</td>
+</tr>
+<tr>
+<td>备课上下文</td>
+<td>包含学校、学期、班级、年级、学科、语言和课时等 Context</td>
+<td>学科、教学语言和教案均为选填；教学要求或教案至少提供一项，年级不设独立字段</td>
+<td>减少前置配置</td>
+</tr>
+<tr>
+<td>教学作品</td>
+<td>教师个人草稿可进一步发布到创作广场或保存为学校资产</td>
+<td>生成/复制结果先为未保存草稿，首次点击“保存课件”后归入个人作品库；已保存作品的内容或题目修改进入未保存工作副本，点击“保存修改”后才更新库内版本</td>
+<td>统一归属教师个人</td>
+</tr>
+<tr>
+<td>资源</td>
+<td>同时存在跨校创作广场和校本资源库</td>
+<td>只有平台提供的资源广场；教师可收藏或保存个人版本</td>
+<td>删除学校资源治理和教师公开发布</td>
+</tr>
+<tr>
+<td>课堂</td>
+<td>依赖学校、班级和教学 Context 创建课堂</td>
+<td>教师从某一作品创建独立课堂 Session</td>
+<td>课堂不再依赖班级档案</td>
+</tr>
+<tr>
+<td>学生</td>
+<td>同时支持学校账号学生和临时学生</td>
+<td>只支持扫码加入的匿名学生，现场生成临时编号</td>
+<td>删除长期学生身份</td>
+</tr>
+<tr>
+<td>配套题</td>
+<td>采用预设的首次检查题和再试题，并形成固定检查节奏</td>
+<td>AI 根据教学作品自动生成单选、多选、判断题；教师可修改、新增、删除或重新生成</td>
+<td>题库从固定检查转为作品配套内容</td>
+</tr>
+<tr>
+<td>作答</td>
+<td>按首次与再试阶段收集和锁定答案</td>
+<td>每次发题形成独立互动轮次，结束收集前允许改答，以最后一次成功提交为准</td>
+<td>从固定两阶段转为通用多轮互动</td>
+</tr>
+<tr>
+<td>课堂工具</td>
+<td>8 类工具与教学流程共同存在</td>
+<td>仅保留投票和信号灯，并与正式题分开统计</td>
+<td>收敛为轻量即时反馈</td>
+</tr>
+<tr>
+<td>课堂报告</td>
+<td>面向教师的班级课堂记录，并可为学校账号学生保留个人单课记录</td>
+<td>只面向教师展示整堂课的匿名整体汇总</td>
+<td>删除个人学生报告</td>
+</tr>
+<tr>
+<td>教学连续性</td>
+<td>报告提供下一课建议文本</td>
+<td>教师选择报告反馈，作为下一次备课的输入之一</td>
+<td>从建议阅读变为可执行入口</td>
+</tr>
+</tbody></table></div>
+<p>本文件比较的是两代产品的业务设计，不评价旧原型采用何种存储、接口或样例数据。2.0 原型虽然不承担后端开发，但所有页面和状态都应按照最终真实产品的业务对象与规则进行设计。</p>
+<hr>
+<h2 id="8-20-原型改造重点">8. 2.0 原型改造重点<a class="heading-anchor" href="#8-20-原型改造重点" aria-label="链接到本节">#</a></h2><h3 id="81-可以沿用的体验思想">8.1 可以沿用的体验思想<a class="heading-anchor" href="#81-可以沿用的体验思想" aria-label="链接到本节">#</a></h3><ul>
+<li>教师从教学意图快速开始；</li>
+<li>首页不再额外展示未保存草稿提醒；未保存草稿仍由 T05/T06 的任务与作品编辑流程管理；</li>
+<li>生成/复制结果进入编辑页后，首次主操作为“保存课件”；保存前不进入个人作品库；</li>
+<li>已保存作品的内容或题目修改进入未保存工作副本，主操作显示“保存修改”；</li>
+<li>首次“保存课件”或后续“保存修改”成功前均禁止创建课堂；保存后创建课堂并展示二维码；</li>
+<li>学生在候课后进入课堂；</li>
+<li>教师控制内容，学生端跟随；</li>
+<li>教师决定何时发布问题、结束收集和公布结果；</li>
+<li>报告只基于已经发生的课堂证据；</li>
+<li>资源建立副本后不影响原资源，复制进度需与从零生成课件明确区分。</li>
+</ul>
+<h3 id="82-不应直接沿用的旧页面结构">8.2 不应直接沿用的旧页面结构<a class="heading-anchor" href="#82-不应直接沿用的旧页面结构" aria-label="链接到本节">#</a></h3><ul>
+<li>首页不再显示学校、班级、任教关系、级别和课程包 Context；</li>
+<li>作品页不能继续假设所有内容都是固定页数的 PPT；</li>
+<li>课堂不能再把“首次检查—干预—再试”设为唯一主流程；</li>
+<li>学生端不能保留学校账号登录和个人单课历史；</li>
+<li>报告不能以班级和学生记录为组织骨架；</li>
+<li>资源库不能沿用“校本资产、科主任治理”的页面结构；</li>
+<li>课堂工具面板不能保留已废弃的 6 个工具入口；</li>
+</ul>
+<h3 id="83-设计优先级">8.3 设计优先级<a class="heading-anchor" href="#83-设计优先级" aria-label="链接到本节">#</a></h3><ol>
+<li>先完成教师个人账号、激活与三种备课入口；</li>
+<li>再完成通用教学作品、个人作品库和 AI 配套题；</li>
+<li>再完成教师/学生双端的匿名课堂与只读同步；</li>
+<li>保留投票、信号灯并删除其他工具；</li>
+<li>完成整体报告和“继续备课”动作，确保流程真正闭环；</li>
+<li>在主闭环页面稳定后补齐异常状态、权益状态和待确认占位。</li>
+</ol>
+<hr>
+<h2 id="9-影响差异结论的待确认事项">9. 影响差异结论的待确认事项<a class="heading-anchor" href="#9-影响差异结论的待确认事项" aria-label="链接到本节">#</a></h2><p>以下项目尚不能简单归类为最终“保留”或“废弃”：</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>旧 Demo</th>
+<th>当前 2.0 状态</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>登录方式</td>
+<td>学校邮箱 OTP</td>
+<td>教师个人账号已确认，邮箱/手机/密码等方式待确认</td>
+</tr>
+<tr>
+<td>课时输入</td>
+<td>35/40/45/50 分钟</td>
+<td>未列入已确认核心字段；是否作为选填待确认</td>
+</tr>
+<tr>
+<td>教师长期偏好</td>
+<td>语言、术语和教学调整可保存</td>
+<td>是否保留个人偏好待确认</td>
+</tr>
+<tr>
+<td>完整版本历史</td>
+<td>v1/v2 查看和恢复</td>
+<td>是否需要版本列表及回滚待确认</td>
+</tr>
+<tr>
+<td>无题作品开课</td>
+<td>旧版一定有固定题</td>
+<td>2.0 是否允许待确认，建议允许</td>
+</tr>
+<tr>
+<td>互动互斥</td>
+<td>旧主流程一次只有一个快速检查</td>
+<td>正式题、投票、信号灯是否互斥待确认</td>
+</tr>
+<tr>
+<td>投票规则</td>
+<td>旧版单选 A-D</td>
+<td>2–4 个选项已确认，单选/多选和改答待确认</td>
+</tr>
+<tr>
+<td>信号灯规则</td>
+<td>固定红黄绿</td>
+<td>档位、文案、改答和报告规则待确认</td>
+</tr>
+<tr>
+<td>报告生成方式</td>
+<td>结束课堂后生成课堂记录</td>
+<td>自动生成还是教师触发待确认</td>
+</tr>
+<tr>
+<td>空数据报告</td>
+<td>可生成没有有效互动证据的课堂记录</td>
+<td>无学生、无题、零提交或只有课堂工具时是否生成报告待确认</td>
+</tr>
+<tr>
+<td>AI 文字复盘</td>
+<td>提供教师总结草稿</td>
+<td>2.0 是否需要 AI 文字复盘待确认</td>
+</tr>
+<tr>
+<td>报告进入备课的输入</td>
+<td>只有不可操作的下一课建议</td>
+<td>报告反馈是否单独构成有效输入，还是仍须填写新要求/上传教案待确认</td>
+</tr>
+<tr>
+<td>匿名原始数据</td>
+<td>同时保留教师班级记录与部分学生个人记录</td>
+<td>报告只展示整体汇总已确认；原始匿名答案映射保留时长待确认</td>
+</tr>
+<tr>
+<td>托管作品访问</td>
+<td>教学内容在产品内直接打开和同步</td>
+<td>托管链接鉴权、有效期、iframe/CSP 和学生端访问方式待确认</td>
+</tr>
+<tr>
+<td>历史删除</td>
+<td>旧版无完整管理</td>
+<td>作品、课堂、报告的删除与级联待确认</td>
+</tr>
+<tr>
+<td>复杂作品编辑</td>
+<td>以分页课件的单页修改和版本恢复为主</td>
+<td>产品流程已明确为返回候选结果后直接预览、基于最新候选进行多轮修改；最终“套用新版本”只更新未保存工作副本，教师点击“保存修改”后才更新已保存作品；知雀的授权、任务及版本返回接口待技术核验</td>
+</tr>
+<tr>
+<td>复杂作品同步</td>
+<td>以分页课件的当前页同步为主</td>
+<td>HTML、动画、3D、游戏状态同步范围待技术核验</td>
+</tr>
+<tr>
+<td>平台运营后台</td>
+<td>由学校管理端和创作广场承担资源与权限治理</td>
+<td>是否建设平台资源/激活码运营后台待确认</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="10-旧项目功能范围依据">10. 旧项目功能范围依据<a class="heading-anchor" href="#10-旧项目功能范围依据" aria-label="链接到本节">#</a></h2><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>产品端</th>
+<th>旧项目展示的正式功能范围</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>学校管理端</td>
+<td>学校设置、人员与权限、教学结构、学科教学设置、策略、审计和学校级治理</td>
+</tr>
+<tr>
+<td>教师备课端</td>
+<td>登录、任教 Context、教学意图与材料输入、AI 生成分页课件、逐页修改、版本恢复和开课</td>
+</tr>
+<tr>
+<td>教师资源端</td>
+<td>创作广场、收藏、复制改编、校本资源保存、发布、封存与恢复</td>
+</tr>
+<tr>
+<td>教师课堂端</td>
+<td>创建课堂、二维码候课、内容播放、快速检查、建议讲解、再试、结果公布和课堂工具</td>
+</tr>
+<tr>
+<td>教师报告端</td>
+<td>班级课堂记录、首次/再试证据、教师总结草稿、下一课建议和校本保存</td>
+</tr>
+<tr>
+<td>学生端</td>
+<td>学校账号或临时身份加入、候课、内容跟随、快速检查作答、结果查看和个人单课记录</td>
+</tr>
+</tbody></table></div>
+<p>以上范围用于还原旧项目原本要解决的业务问题和产品边界，不用于评价原型的工程完整度。</p>
+<hr>
+<h2 id="11-最终迁移结论">11. 最终迁移结论<a class="heading-anchor" href="#11-最终迁移结论" aria-label="链接到本节">#</a></h2><p>Teeko V2.0 应保留旧 Demo 中“教师快速备课、生成作品、扫码开课、学生跟随、教师提问、整体复盘”的教学主干，但必须删除学校治理、班级学籍、校本资源、学生长期记录和大部分课堂工具。</p>
+<p>旧项目中的教学节奏与核心场景值得保留，但以学校、班级和学籍为中心的业务模型不再适合 2.0。核心重构点是：</p>
+<figure class="code-block"><figcaption>text</figcaption><pre><code>学校 Context → 教师个人权益
+固定分页课件 → 通用教学作品
+固定快速检查 → AI 配套正式题
+账号/临时混合学生 → 全匿名临时编号
+学校/班级课堂 → 独立匿名课堂 Session
+校本资源 → 教师个人作品库
+报告建议文本 → 可进入下一次备课的闭环</code></pre></figure>
+    </main>
+    <aside class="rail" aria-label="阅读辅助">
+      <section class="rail-card">
+        <h2>状态说明</h2>
+        <div class="legend-list">
+          <div class="legend-row"><span class="status status-keep">保留</span><span>价值继续存在</span></div>
+          <div class="legend-row"><span class="status status-adjust">调整</span><span>规则或对象改变</span></div>
+          <div class="legend-row"><span class="status status-remove">废弃</span><span>不进入 2.0</span></div>
+          <div class="legend-row"><span class="status status-new">新增</span><span>闭环必须补齐</span></div>
+          <div class="legend-row"><span class="status status-pending">待确认</span><span>尚未形成决定</span></div>
+        </div>
+      </section>
+      <section class="rail-card">
+        <h2>阅读重点</h2>
+        <p class="rail-note">先看第 1 章总览和两张流程图，再按流程阶段核对功能处置。第 9 章集中列出研发评审待确认项。</p>
+      </section>
+    </aside>
+  </div>
+  <button class="backdrop" type="button" aria-label="关闭目录"></button>
+  <script>
+    const root = document.documentElement;
+    const themeButton = document.querySelector('.theme-button');
+    const storedTheme = localStorage.getItem('teeko-diff-theme');
+    const preferredTheme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    const setTheme = theme => {
+      root.dataset.theme = theme;
+      themeButton.textContent = theme === 'dark' ? '浅色' : '深色';
+      localStorage.setItem('teeko-diff-theme', theme);
+      dispatchEvent(new CustomEvent('teeko-theme', { detail: theme }));
+    };
+    setTheme(storedTheme || preferredTheme);
+    themeButton.addEventListener('click', () => setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark'));
+    document.querySelector('.print-button').addEventListener('click', () => print());
+
+    const menuButton = document.querySelector('.menu-button');
+    const backdrop = document.querySelector('.backdrop');
+    const closeMenu = () => {
+      document.body.classList.remove('menu-open');
+      menuButton.setAttribute('aria-expanded', 'false');
+    };
+    menuButton.addEventListener('click', () => {
+      const open = document.body.classList.toggle('menu-open');
+      menuButton.setAttribute('aria-expanded', String(open));
+    });
+    backdrop.addEventListener('click', closeMenu);
+    document.querySelectorAll('.toc-link').forEach(link => link.addEventListener('click', closeMenu));
+
+    const tocLinks = [...document.querySelectorAll('.toc-link')];
+    const sections = tocLinks.map(link => document.getElementById(link.dataset.target)).filter(Boolean);
+    const observer = new IntersectionObserver(entries => {
+      const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+      if (!visible) return;
+      tocLinks.forEach(link => link.classList.toggle('active', link.dataset.target === visible.target.id));
+    }, { rootMargin: '-18% 0px -70% 0px' });
+    sections.forEach(section => observer.observe(section));
+
+    const statusRules = [
+      ['废弃', 'status-remove'], ['不迁移', 'status-remove'],
+      ['不新增', 'status-remove'],
+      ['新增', 'status-new'],
+      ['待确认', 'status-pending'],
+      ['调整', 'status-adjust'], ['重做', 'status-adjust'], ['拆分', 'status-adjust'],
+      ['保留', 'status-keep']
+    ];
+    document.querySelectorAll('td').forEach(cell => {
+      const value = cell.textContent.trim();
+      if (value.length > 24 || cell.children.length) return;
+      const match = statusRules.find(([word]) => value.includes(word));
+      if (!match) return;
+      const span = document.createElement('span');
+      span.className = 'status ' + match[1];
+      span.textContent = value;
+      cell.replaceChildren(span);
+    });
+  </script>
+  <script type="module">
+    const figures = [...document.querySelectorAll('.diagram-card')];
+    const diagrams = figures.map((figure, index) => {
+      const node = figure.querySelector('.mermaid');
+      node.dataset.source = node.textContent.trim();
+      node.setAttribute('role', 'img');
+      node.setAttribute('aria-label', figure.querySelector('figcaption span').textContent);
+      node.id = 'mermaid-diagram-' + (index + 1);
+      return node;
+    });
+    let mermaid;
+    let rendering = Promise.resolve();
+    const renderDiagrams = theme => {
+      if (!mermaid) return;
+      rendering = rendering.then(async () => {
+        mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: 'strict',
+          theme: theme === 'dark' ? 'dark' : 'base',
+          fontFamily: 'SF Pro Text, PingFang TC, PingFang SC, Microsoft JhengHei, sans-serif',
+          themeVariables: theme === 'dark' ? {
+            primaryColor: '#123b31', primaryTextColor: '#e7efeb', primaryBorderColor: '#58c6aa',
+            lineColor: '#8bdac7', secondaryColor: '#202b26', tertiaryColor: '#151d19'
+          } : {
+            primaryColor: '#d9eee7', primaryTextColor: '#17231f', primaryBorderColor: '#0b725f',
+            lineColor: '#0b725f', secondaryColor: '#e7eeea', tertiaryColor: '#ffffff'
+          },
+          flowchart: { curve: 'basis', htmlLabels: true, useMaxWidth: false, nodeSpacing: 28, rankSpacing: 42 }
+        });
+        for (const [index, node] of diagrams.entries()) {
+          node.removeAttribute('data-processed');
+          node.textContent = node.dataset.source;
+          figures[index].classList.remove('failed');
+          try {
+            await mermaid.run({ nodes: [node] });
+          } catch (error) {
+            node.textContent = node.dataset.source;
+            figures[index].classList.add('failed');
+            console.error('Mermaid diagram failed', error);
+          }
+        }
+      });
+    };
+    try {
+      const module = await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs');
+      mermaid = module.default;
+      renderDiagrams(root.dataset.theme);
+      addEventListener('teeko-theme', event => renderDiagrams(event.detail));
+    } catch (error) {
+      figures.forEach(figure => figure.classList.add('failed'));
+      console.error('Mermaid runtime unavailable', error);
+    }
+  </script>
+</body>
+</html>
