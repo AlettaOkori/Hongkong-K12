@@ -1968,16 +1968,6 @@
       });
     }
 
-    if (ui.modal?.type === "replace-unsaved-draft") {
-      const draft = state.generation.draft;
-      return modalShell({
-        title: "先處理未儲存課件",
-        description: "開始新的生成任務會取代目前草稿。",
-        body: `<div class="notice"><strong>${escapeHTML(draft?.title || "未儲存課件")}</strong><br />這份草稿尚未加入我的作品。你可以返回編輯並儲存，或明確放棄後繼續。</div>`,
-        footer: `${button("返回編輯", "navigate", "ghost", `data-route="/work/${draft?.id || ""}"`)}${button("放棄草稿並繼續", "discard-draft-and-generate", "danger")}`
-      });
-    }
-
     if (ui.modal?.type === "guide") {
       return modalShell({
         title: "原型體驗導覽",
@@ -2435,19 +2425,6 @@
         workId: `w-${Date.now()}`,
         resourceId: null
       };
-      if (state.generation.draft) {
-        ui.modal = { type: "replace-unsaved-draft", generationTask };
-        render();
-        return;
-      }
-      beginGeneration(generationTask);
-      return;
-    }
-
-    if (action === "discard-draft-and-generate") {
-      const generationTask = ui.modal?.generationTask;
-      if (!generationTask) return;
-      ui.modal = null;
       beginGeneration(generationTask);
       return;
     }
@@ -2826,11 +2803,6 @@
         resourceId,
         message: "正在建立可修改的課件草稿。 "
       };
-      if (state.generation.draft) {
-        ui.modal = { type: "replace-unsaved-draft", generationTask };
-        render();
-        return;
-      }
       beginGeneration(generationTask);
       return;
     }

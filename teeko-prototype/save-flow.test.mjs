@@ -29,7 +29,7 @@ test("teaching language and lesson plan are visibly optional", () => {
 });
 
 test("returned content revisions show an inline preview before being applied", () => {
-  const overlay = section('if (ui.drawer?.type === "content-editor")', 'if (ui.modal?.type === "replace-unsaved-draft")');
+  const overlay = section('if (ui.drawer?.type === "content-editor")', 'if (ui.modal?.type === "guide")');
   const actions = section('if (action === "submit-work-revision")', 'if (action === "open-question-editor") {');
 
   assert.match(overlay, /提交修改/);
@@ -46,6 +46,14 @@ test("returned content revisions show an inline preview before being applied", (
   assert.match(actions, /work\.versionId = revision\.candidate\.versionId/);
   assert.doesNotMatch(source, /preview-work-revision/);
   assert.doesNotMatch(source, /save-work-content/);
+});
+
+test("new generation replaces an unsaved draft without a blocking prompt", () => {
+  assert.doesNotMatch(source, /replace-unsaved-draft/);
+  assert.doesNotMatch(source, /discard-draft-and-generate/);
+  assert.doesNotMatch(source, /先處理未儲存課件/);
+  assert.match(source, /if \(action === "submit-prep"\)[\s\S]*?beginGeneration\(generationTask\)/);
+  assert.match(source, /if \(action === "use-resource"\)[\s\S]*?beginGeneration\(generationTask\)/);
 });
 
 test("saved works require an explicit save after content or question changes", () => {
@@ -66,7 +74,7 @@ test("saved works require an explicit save after content or question changes", (
 
 test("content and question editors use the existing large modal", () => {
   const questionEditor = section("function renderQuestionEditor", "function renderOverlay");
-  const contentEditor = section('if (ui.drawer?.type === "content-editor")', 'if (ui.modal?.type === "replace-unsaved-draft")');
+  const contentEditor = section('if (ui.drawer?.type === "content-editor")', 'if (ui.modal?.type === "guide")');
 
   assert.match(questionEditor, /return modalShell\(\{/);
   assert.match(questionEditor, /large: true/);
