@@ -219,11 +219,11 @@
 <a class="toc-link level-3" href="#52-数据关系" data-target="52-数据关系">5.2 数据关系</a>
 <a class="toc-link level-3" href="#53-快照原则" data-target="53-快照原则">5.3 快照原则</a>
 <a class="toc-link level-2" href="#6-端到端业务闭环" data-target="6-端到端业务闭环">6. 端到端业务闭环</a>
-<a class="toc-link level-3" href="#61-三条备课入口的汇合点" data-target="61-三条备课入口的汇合点">6.1 三条备课入口的汇合点</a>
+<a class="toc-link level-3" href="#61-三类备课起点的汇合点" data-target="61-三类备课起点的汇合点">6.1 三类备课起点的汇合点</a>
 <a class="toc-link level-2" href="#7-页面清单与导航关系" data-target="7-页面清单与导航关系">7. 页面清单与导航关系</a>
 <a class="toc-link level-2" href="#8-详细用户流程" data-target="8-详细用户流程">8. 详细用户流程</a>
 <a class="toc-link level-3" href="#81-登录与激活" data-target="81-登录与激活">8.1 登录与激活</a>
-<a class="toc-link level-3" href="#82-首页对话式备课与独立备课" data-target="82-首页对话式备课与独立备课">8.2 首页对话式备课与独立备课</a>
+<a class="toc-link level-3" href="#82-首页对话式备课与报告继续备课" data-target="82-首页对话式备课与报告继续备课">8.2 首页对话式备课与报告继续备课</a>
 <a class="toc-link level-3" href="#83-从资源广场备课" data-target="83-从资源广场备课">8.3 从资源广场备课</a>
 <a class="toc-link level-3" href="#84-教学作品与配套题" data-target="84-教学作品与配套题">8.4 教学作品与配套题</a>
 <a class="toc-link level-3" href="#85-个人作品保存与复用" data-target="85-个人作品保存与复用">8.5 个人作品保存与复用</a>
@@ -281,7 +281,7 @@
 <a class="toc-link level-2" href="#16-验收标准" data-target="16-验收标准">16. 验收标准</a>
 <a class="toc-link level-3" href="#161-验收说明" data-target="161-验收说明">16.1 验收说明</a>
 <a class="toc-link level-3" href="#162-账号范围与资产" data-target="162-账号范围与资产">16.2 账号、范围与资产</a>
-<a class="toc-link level-3" href="#163-独立备课与生成" data-target="163-独立备课与生成">16.3 独立备课与生成</a>
+<a class="toc-link level-3" href="#163-首页备课与生成" data-target="163-首页备课与生成">16.3 首页备课与生成</a>
 <a class="toc-link level-3" href="#164-配套题" data-target="164-配套题">16.4 配套题</a>
 <a class="toc-link level-3" href="#165-资源广场与个人版本" data-target="165-资源广场与个人版本">16.5 资源广场与个人版本</a>
 <a class="toc-link level-3" href="#166-创建课堂与匿名加入" data-target="166-创建课堂与匿名加入">16.6 创建课堂与匿名加入</a>
@@ -411,7 +411,7 @@
 <h2 id="2-产品定位目标与非目标">2. 产品定位、目标与非目标<a class="heading-anchor" href="#2-产品定位目标与非目标" aria-label="链接到本节">#</a></h2><h3 id="21-一句话定位">2.1 一句话定位<a class="heading-anchor" href="#21-一句话定位" aria-label="链接到本节">#</a></h3><p>Teeko 是一款由学校购买权益、教师以个人账号使用的 AI 教学产品，帮助教师快速生成教学作品，在课堂中组织匿名互动，并把课堂整体反馈带入下一次备课。</p>
 <h3 id="22-本次目标">2.2 本次目标<a class="heading-anchor" href="#22-本次目标" aria-label="链接到本节">#</a></h3><ol>
 <li>交付一条真实可用、可以由市场验证的最小业务闭环；</li>
-<li>教师可以从独立备课入口、平台资源或历史报告开始新一轮备课；</li>
+<li>教师可以从首页对话式备课、平台资源或历史报告开始新一轮备课；</li>
 <li>教学作品可直接用于课堂，不限定为 PPT；</li>
 <li>学生扫码即可进入课堂，无账号、无姓名、无长期身份；</li>
 <li>正式题、投票和信号灯能产生真实的课堂整体数据；</li>
@@ -525,7 +525,7 @@
 <li>教师查看个人作品并创建课堂；</li>
 <li>学生使用平板扫码进入，跟随教师内容并参与互动；</li>
 <li>教师课后查看整体报告；</li>
-<li>教师选择报告中的反馈，进入下一次独立备课。</li>
+<li>教师选择报告中的反馈，进入报告继续备课。</li>
 </ol>
 <hr>
 <h2 id="4-产品范围与信息架构">4. 产品范围与信息架构<a class="heading-anchor" href="#4-产品范围与信息架构" aria-label="链接到本节">#</a></h2><h3 id="41-教师端一级入口">4.1 教师端一级入口<a class="heading-anchor" href="#41-教师端一级入口" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
@@ -538,10 +538,6 @@
 <tbody><tr>
 <td>首页</td>
 <td>默认展示对话式备课输入区，可直接输入教学要求或上传教案并发起生成；同时展示最近作品、进行中的生成任务、最近课堂报告和授权提醒</td>
-</tr>
-<tr>
-<td>备课</td>
-<td>新建备课、生成进度、教学作品详情/编辑、配套题管理</td>
 </tr>
 <tr>
 <td>资源广场</td>
@@ -697,7 +693,7 @@
 <h2 id="6-端到端业务闭环">6. 端到端业务闭环<a class="heading-anchor" href="#6-端到端业务闭环" aria-label="链接到本节">#</a></h2><figure class="mermaid-block"><figcaption>端到端业务闭环</figcaption><div class="mermaid">flowchart TD
     A[学校采购并向教师发放激活码] --&gt; B[教师登录个人账号并激活]
     B --&gt; C{选择备课起点}
-    C --&gt;|首页对话式备课/独立备课| D[输入要求和/或上传教案\n按需选择学科与教学语言]
+    C --&gt;|首页对话式备课| D[输入要求和/或上传教案\n按需选择学科与教学语言]
     C --&gt;|资源广场| E[预览资源\n收藏或使用并修改]
     C --&gt;|课堂报告| F[选择要带入的课堂反馈]
     E --&gt; G[T05 复制平台资源]
@@ -721,7 +717,7 @@
     R --&gt; S[教师结束课堂]
     S --&gt; T[生成整体课堂报告\n自动或手动触发待确认]
     T --&gt; U[教师查看并选择反馈]
-    U --&gt; F</div></figure><h3 id="61-三条备课入口的汇合点">6.1 三条备课入口的汇合点<a class="heading-anchor" href="#61-三条备课入口的汇合点" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+    U --&gt; F</div></figure><h3 id="61-三类备课起点的汇合点">6.1 三类备课起点的汇合点<a class="heading-anchor" href="#61-三类备课起点的汇合点" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
 <thead>
 <tr>
 <th>起点</th>
@@ -731,7 +727,7 @@
 </tr>
 </thead>
 <tbody><tr>
-<td>首页对话式备课/独立备课</td>
+<td>首页对话式备课</td>
 <td>教学要求和/或教案；学科、教学语言均为可选补充</td>
 <td>调用现有服务生成；未选择的学科或语言不作为显式约束</td>
 <td>待教师点击“保存课件”的教学作品结果与配套题</td>
@@ -775,19 +771,19 @@
 <td>T03</td>
 <td>教师首页</td>
 <td>登录成功</td>
-<td>可在首页对话区直接提交至 T05，也可前往 T04、T07、T09、T16</td>
+<td>可在首页对话区直接提交至 T05，也可前往 T07、T09、T16</td>
 </tr>
 <tr>
 <td>T04</td>
-<td>新建备课</td>
-<td>备课导航、报告继续备课</td>
+<td>报告继续备课</td>
+<td>报告详情、生成失败后的修改要求</td>
 <td>T05 生成进度</td>
 </tr>
 <tr>
 <td>T05</td>
 <td>任务进度</td>
 <td>首页对话区或 T04 提交生成、T08 使用并修改、首页任务卡</td>
-<td>T06 作品详情/编辑；页面按独立生成、报告继续备课或资源复制显示对应阶段</td>
+<td>T06 作品详情/编辑；页面按首页生成、报告继续备课或资源复制显示对应阶段</td>
 </tr>
 <tr>
 <td>T06</td>
@@ -835,7 +831,7 @@
 <td>T15</td>
 <td>报告详情</td>
 <td>报告生成完成、课堂历史</td>
-<td>T04 新建备课</td>
+<td>T04 报告继续备课</td>
 </tr>
 <tr>
 <td>T16</td>
@@ -938,7 +934,7 @@
 <li>激活码输错、过期、已使用时的具体文案；</li>
 <li>账号更换、激活码错绑和申诉流程。</li>
 </ul>
-<h3 id="82-首页对话式备课与独立备课">8.2 首页对话式备课与独立备课<a class="heading-anchor" href="#82-首页对话式备课与独立备课" aria-label="链接到本节">#</a></h3><h4 id="821-输入规则">8.2.1 输入规则<a class="heading-anchor" href="#821-输入规则" aria-label="链接到本节">#</a></h4><div class="table-wrap"><table>
+<h3 id="82-首页对话式备课与报告继续备课">8.2 首页对话式备课与报告继续备课<a class="heading-anchor" href="#82-首页对话式备课与报告继续备课" aria-label="链接到本节">#</a></h3><h4 id="821-输入规则">8.2.1 输入规则<a class="heading-anchor" href="#821-输入规则" aria-label="链接到本节">#</a></h4><div class="table-wrap"><table>
 <thead>
 <tr>
 <th>字段</th>
@@ -967,13 +963,13 @@
 </tr>
 </tbody></table></div>
 <p><strong>待确认</strong>：学科采用固定列表、搜索选择还是自由输入；未选择学科或教学语言时，现有教学作品生成服务的自动识别与兜底规则；教案支持的格式、大小、数量、页数、扫描件及加密文件规则。</p>
-<h4 id="822-首页对话式备课入口">8.2.2 首页对话式备课入口<a class="heading-anchor" href="#822-首页对话式备课入口" aria-label="链接到本节">#</a></h4><ol>
+<h4 id="822-首页备课入口">8.2.2 首页备课入口<a class="heading-anchor" href="#822-首页备课入口" aria-label="链接到本节">#</a></h4><ol>
 <li>教师登录成功进入 T03 后，首屏主操作必须是对话式备课输入区，不以宣传横幅或“开始备课”按钮作为主要起点；</li>
 <li>教师可直接输入教学要求，也可只上传教案；两者至少提供一项；</li>
 <li>学科和教学语言作为可选设置显示在对话输入区底部；教案上传为选填，三者均不应使用必填标记；</li>
 <li>“上传教案”入口固定在对话输入区左下角；“生成教学作品”作为主要操作位于底部操作区另一侧；</li>
 <li>首页提交后直接创建生成任务并进入 T05，不要求先跳转 T04；</li>
-<li>T04 独立备课页继续保留，与首页共用相同输入和校验规则，用于从备课导航进入或承接报告继续备课。</li>
+<li>T04 仅用于承接报告上下文或生成失败后的修改要求，不作为独立的新建入口；页面与首页共用相同输入和校验规则。</li>
 </ol>
 <h4 id="823-正常流程">8.2.3 正常流程<a class="heading-anchor" href="#823-正常流程" aria-label="链接到本节">#</a></h4><div class="table-wrap"><table>
 <thead>
@@ -987,9 +983,9 @@
 </thead>
 <tbody><tr>
 <td>1</td>
-<td>登录后在首页对话区开始输入，或从备课导航进入 T04</td>
+<td>登录后在首页对话区开始输入，或从报告页进入 T04</td>
 <td>创建未提交的备课草稿</td>
-<td>首页对话输入态或 T04 初始空表单</td>
+<td>首页对话输入态或 T04 报告继续备课表单</td>
 <td>留在当前页</td>
 </tr>
 <tr>
@@ -1712,7 +1708,7 @@
 </thead>
 <tbody><tr>
 <td>FR-P01</td>
-<td>新建备课时，学科和教学语言均为可选；未选择不得阻止生成。</td>
+<td>发起备课时，学科和教学语言均为可选；未选择不得阻止生成。</td>
 </tr>
 <tr>
 <td>FR-P02</td>
@@ -2121,21 +2117,21 @@
 <td>留在本页</td>
 </tr>
 <tr>
-<td>T04 备课</td>
+<td>T04 报告继续备课</td>
 <td>初始/编辑中</td>
-<td>表单与上传区</td>
+<td>带有报告上下文的表单与上传区</td>
 <td>填写/上传</td>
 <td>留在本页</td>
 </tr>
 <tr>
-<td>T04 备课</td>
+<td>T04 报告继续备课</td>
 <td>上传/解析中</td>
 <td>文件进度、不可重复提交</td>
 <td>等待/取消待确认</td>
 <td>文件就绪</td>
 </tr>
 <tr>
-<td>T04 备课</td>
+<td>T04 报告继续备课</td>
 <td>校验失败</td>
 <td>定位到缺失或非法字段</td>
 <td>修改</td>
@@ -2143,7 +2139,7 @@
 </tr>
 <tr>
 <td>T05 任务</td>
-<td>独立/报告备课排队或生成中</td>
+<td>首页/报告备课排队或生成中</td>
 <td>显示从教学输入生成新作品的真实任务阶段</td>
 <td>是否可离开并后台继续待确认</td>
 <td>T06</td>
@@ -2313,8 +2309,8 @@
 <td>T09 作品库</td>
 <td>空/列表/失败</td>
 <td>新用户引导或作品卡状态</td>
-<td>新建/打开/重试</td>
-<td>T04/T06</td>
+<td>前往首页/打开/重试</td>
+<td>T03/T06</td>
 </tr>
 <tr>
 <td>T12 候课室</td>
@@ -3399,7 +3395,7 @@
 <td>全流程不要求注册、登录、姓名、学号或班级信息</td>
 </tr>
 </tbody></table></div>
-<h3 id="163-独立备课与生成">16.3 独立备课与生成<a class="heading-anchor" href="#163-独立备课与生成" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
+<h3 id="163-首页备课与生成">16.3 首页备课与生成<a class="heading-anchor" href="#163-首页备课与生成" aria-label="链接到本节">#</a></h3><div class="table-wrap"><table>
 <thead>
 <tr>
 <th>编号</th>
@@ -3454,7 +3450,7 @@
 <td>AC-P12</td>
 <td>教师在首页提供有效输入</td>
 <td>点击“生成教学作品”</td>
-<td>系统直接进入 T05，不强制先进入 T04</td>
+<td>系统直接创建 T05，不经过独立的新建备课页</td>
 </tr>
 <tr>
 <td>AC-P06</td>
@@ -3914,11 +3910,11 @@
 <td>AC-B04</td>
 <td>教师点击“基于本次课堂继续备课”</td>
 <td>选择课堂反馈并确认</td>
-<td>系统进入新建备课并携带所选报告上下文</td>
+<td>系统进入报告继续备课页并携带所选报告上下文</td>
 </tr>
 <tr>
 <td>AC-B05</td>
-<td>教师在继续备课页按最终确认的输入规则提交生成</td>
+<td>教师在报告继续备课页按最终确认的输入规则提交生成</td>
 <td>新作品生成成功</td>
 <td>形成新的未保存作品结果与配套题；教师点击“保存课件”后才成为独立个人作品，不覆盖来源作品或报告</td>
 </tr>

@@ -197,7 +197,7 @@
         updatedAt: "今天 09:42",
         pages: 6,
         cover: "physics",
-        source: "獨立備課",
+        source: "首頁備課",
         versionId: "ver-lens-003",
         hostedUrl: "https://61645698-1600-400a-946d-1a2d7727cf01.hwgz.zhique.cn/7fb9a3b5-23b1-4dc0-9d7e-936c30a26bea/index.html",
         summary: "透過折射光線與焦距調整實驗，理解凸透鏡的成像規律及生活應用。",
@@ -227,7 +227,7 @@
         updatedAt: "8 月 24 日",
         pages: 7,
         cover: "history-cover",
-        source: "獨立備課",
+        source: "首頁備課",
         versionId: "ver-history-001",
         hostedUrl: "https://a.zhique.cn/home",
         summary: "以地圖和時間軸理解十九世紀香港的城市發展及社會轉變。",
@@ -336,7 +336,8 @@
     versionId: `ver-${work.id || Date.now()}`,
     hostedUrl: "https://a.zhique.cn/home",
     summary: "由 AI 根據教師要求建立的互動教學作品。",
-    ...work
+    ...work,
+    source: work.source === "獨立備課" ? "首頁備課" : work.source
   }));
   const cityWork = state.works.find(work => work.id === "w2");
   if (cityWork?.questions?.[0]?.id === "q1") cityWork.questions = structuredClone(cityQuestions);
@@ -431,7 +432,6 @@
 
   const navItems = [
     { key: "home", label: "首頁", route: "/home" },
-    { key: "prepare", label: "備課", route: "/prepare" },
     { key: "resources", label: "資源", route: "/resources" },
     { key: "works", label: "作品", route: "/works" },
     { key: "history", label: "課堂", route: "/history" }
@@ -755,7 +755,7 @@
     const context = prep.reportContext;
     const content = `
       <section class="page">
-        ${pageHead("備課", context ? "基於課堂回饋繼續備課" : "新增備課", context ? "上一堂課的整體回饋已帶入，你仍可調整學科、語言及新的教學要求。" : "先說明教學意圖，Teeko 會生成可直接授課的作品及配套正式題。")}
+        ${pageHead("備課", context ? "基於課堂回饋繼續備課" : "備課", context ? "上一堂課的整體回饋已帶入，你仍可調整學科、語言及新的教學要求。" : "從首頁開始新的備課；這裡用於承接課堂報告或修改生成要求。")}
         <div class="form-layout">
           <aside class="card brief-panel accent-card">
             <p class="eyebrow">開始之前</p>
@@ -872,7 +872,7 @@
             updatedAt: "剛剛",
             pages: sourceResource ? 5 : 6,
             cover: sourceResource?.cover || "physics",
-            source: sourceResource ? "平台資源個人版本" : state.prep.reportContext ? "課堂報告繼續備課" : "獨立備課",
+            source: sourceResource ? "平台資源個人版本" : state.prep.reportContext ? "課堂報告繼續備課" : "首頁備課",
             versionId: `ver-${Date.now()}`,
             hostedUrl: "https://a.zhique.cn/home",
             summary: sourceResource?.description || state.prep.requirements || "由 AI 根據教師的備課要求生成的互動教學作品。",
@@ -969,7 +969,7 @@
     });
     const content = `
       <section class="page page-wide">
-        ${pageHead("個人作品", "我的作品", "這裡儲存你生成及從平台資源改編的個人版本。每份作品都可以繼續修改或建立課堂。", button("新增備課", "navigate", "primary", 'data-route="/prepare"'))}
+        ${pageHead("個人作品", "我的作品", "這裡儲存你生成及從平台資源改編的個人版本。每份作品都可以繼續修改或建立課堂。")}
         <div class="filter-bar">
           <div>
             <span class="badge badge-jade">${state.works.length} 份個人作品</span>
@@ -1977,7 +1977,7 @@
             <div class="brief-step"><span class="brief-number">1</span><div><strong>先備課及查看作品</strong><span>從首頁開始備課，完成生成後修改一題配套題。</span></div></div>
             <div class="brief-step"><span class="brief-number">2</span><div><strong>建立課堂並開學生分頁</strong><span>候課室可開啟學生端預覽，兩個分頁會同步本機狀態。</span></div></div>
             <div class="brief-step"><span class="brief-number">3</span><div><strong>操作內容與發布互動</strong><span>教師翻頁、調整焦距、發題、投票或信號燈，學生端會跟隨。</span></div></div>
-            <div class="brief-step"><span class="brief-number">4</span><div><strong>結束課堂並繼續備課</strong><span>查看匿名整體報告，選擇回饋帶入新的獨立備課。</span></div></div>
+            <div class="brief-step"><span class="brief-number">4</span><div><strong>結束課堂並繼續備課</strong><span>查看匿名整體報告，選擇回饋帶入新一輪備課。</span></div></div>
           </div>
           <div class="prototype-note">學生端示範使用同一瀏覽器的另一個分頁。若瀏覽器阻擋新分頁，可在候課室複製本堂動態學生連結。</div>`,
         footer: `${button("關閉", "close-layer", "primary")}`
@@ -3456,7 +3456,7 @@
       title = "教師首頁 · Teeko";
     } else if (path === "/prepare") {
       markup = renderPrepare();
-      title = "新增備課 · Teeko";
+      title = "備課 · Teeko";
     } else if (path === "/generate") {
       markup = renderGenerate();
       title = "生成進度 · Teeko";
